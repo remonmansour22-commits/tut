@@ -1,0 +1,28 @@
+{
+  "name": "BeastboundTheGreatMigration",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "BeastboundShared": {
+        "$path": "src/shared"
+      }
+    },
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "BeastboundBootstrap": {
+        "$path": "src/server/BeastboundBootstrap.server.lua"
+      },
+      "BeastboundModules": {
+        "$path": "src/server/BeastboundModules"
+      }
+    },
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        "$path": "src/client"
+      }
+    }
+  }
+}

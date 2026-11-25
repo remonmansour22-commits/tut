@@ -1,0 +1,3762 @@
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4">
+<Item class="Workspace" referent="RBX1">
+<Properties>
+<string name="Name">Workspace</string>
+</Properties>
+</Item>
+<Item class="Lighting" referent="RBX2">
+<Properties>
+<string name="Name">Lighting</string>
+</Properties>
+</Item>
+<Item class="ReplicatedStorage" referent="RBX3">
+<Properties>
+<string name="Name">ReplicatedStorage</string>
+</Properties>
+<Item class="Folder" referent="RBX4">
+<Properties>
+<string name="Name">BeastboundShared</string>
+</Properties>
+<Item class="ModuleScript" referent="RBX5">
+<Properties>
+<string name="Name">AudioConfig</string>
+<ProtectedString name="Source">-- Path: ReplicatedStorage/BeastboundShared/AudioConfig
+-- Placeholder sound assets (bundled with the engine, always valid).
+-- Replace any SoundId with real uploaded asset ids in polish later.
+
+local AudioConfig = {
+	UiClick = { SoundId = "rbxasset://sounds/electronicpingshort.wav", Volume = 0.4, Pitch = 1.4 },
+	UiOpen = { SoundId = "rbxasset://sounds/electronicpingshort.wav", Volume = 0.5, Pitch = 1.0 },
+	Gather = { SoundId = "rbxasset://sounds/snap.mp3", Volume = 0.7, Pitch = 1.0 },
+	Build = { SoundId = "rbxasset://sounds/snap.mp3", Volume = 0.8, Pitch = 0.7 },
+	Discover = { SoundId = "rbxasset://sounds/electronicpingshort.wav", Volume = 0.7, Pitch = 0.8 },
+	CreatureCall = { SoundId = "rbxasset://sounds/impact_water.mp3", Volume = 1.0, Pitch = 0.5 },
+	CreaturePurr = { SoundId = "rbxasset://sounds/impact_water.mp3", Volume = 0.7, Pitch = 0.8 },
+	ProjectComplete = { SoundId = "rbxasset://sounds/impact_water.mp3", Volume = 1.0, Pitch = 0.65 },
+}
+
+return AudioConfig
+</ProtectedString>
+</Properties>
+</Item>
+<Item class="ModuleScript" referent="RBX6">
+<Properties>
+<string name="Name">BiomeConfig</string>
+<ProtectedString name="Source">-- Path: ReplicatedStorage/BeastboundShared/BiomeConfig
+-- Journey stages and landmark configuration.
+-- New biomes are added here as data; JourneyService does the rest.
+
+local BiomeConfig = {}
+
+-- worldDressing groups in Workspace/Aruun are tagged with these keys so that
+-- a stage transition can simply tween the right colors.
+BiomeConfig.TintableGroups = {
+	"FoliageTint",
+	"GroundTint",
+	"AccentTint",
+}
+
+BiomeConfig.Stages = {
+	{
+		Id = "Mosslight",
+		Name = "Mosslight Meadow",
+		MomentumTarget = 130,
+		Headline = "Lush, green and gentle. The Dawnward settlement rests on Aruun's back.",
+		Environment = {
+			ClockTime = 9.4,
+			Brightness = 2.2,
+			Ambient = Color3.fromRGB(120, 133, 112),
+			OutdoorAmbient = Color3.fromRGB(150, 160, 140),
+			FogColor = Color3.fromRGB(168, 190, 168),
+			FogEnd = 900,
+			EnvironmentDiffuseScale = 0.5,
+		},
+		Atmosphere = {
+			Density = 0.35,
+			Color = Color3.fromRGB(150, 175, 158),
+			Decay = Color3.fromRGB(110, 130, 125),
+			Glare = 0.15,
+			Haze = 1.6,
+		},
+		Palette = {
+			FoliageTint = Color3.fromRGB(120, 190, 110),
+			GroundTint = Color3.fromRGB(120, 150, 96),
+			AccentTint = Color3.fromRGB(120, 255, 190),
+			Sky = Color3.fromRGB(140, 195, 220),
+		},
+	},
+	{
+		Id = "GoldenReaches",
+		Name = "The Golden Reaches",
+		MomentumTarget = 330,
+		Headline = "Grass gives way to gold. Distant rock formations rise like sails.",
+		Environment = {
+			ClockTime = 15.5,
+			Brightness = 2.4,
+			Ambient = Color3.fromRGB(140, 120, 90),
+			OutdoorAmbient = Color3.fromRGB(175, 155, 120),
+			FogColor = Color3.fromRGB(235, 205, 150),
+			FogEnd = 1100,
+			EnvironmentDiffuseScale = 0.5,
+		},
+		Atmosphere = {
+			Density = 0.4,
+			Color = Color3.fromRGB(225, 190, 130),
+			Decay = Color3.fromRGB(160, 120, 80),
+			Glare = 0.35,
+			Haze = 2.1,
+		},
+		Palette = {
+			FoliageTint = Color3.fromRGB(200, 170, 96),
+			GroundTint = Color3.fromRGB(196, 164, 108),
+			AccentTint = Color3.fromRGB(255, 200, 110),
+			Sky = Color3.fromRGB(225, 175, 120),
+		},
+	},
+	{
+		Id = "Glasswind",
+		Name = "Glasswind Expanse",
+		MomentumTarget = 620,
+		Headline = "Wind-carved glass rock hums as Aruun strides across the mineral sea.",
+		Environment = {
+			ClockTime = 13.0,
+			Brightness = 2.3,
+			Ambient = Color3.fromRGB(140, 150, 165),
+			OutdoorAmbient = Color3.fromRGB(175, 185, 200),
+			FogColor = Color3.fromRGB(200, 215, 230),
+			FogEnd = 1300,
+			EnvironmentDiffuseScale = 0.5,
+		},
+		Atmosphere = {
+			Density = 0.42,
+			Color = Color3.fromRGB(195, 210, 225),
+			Decay = Color3.fromRGB(120, 145, 175),
+			Glare = 0.5,
+			Haze = 2.4,
+		},
+		Palette = {
+			FoliageTint = Color3.fromRGB(150, 180, 170),
+			GroundTint = Color3.fromRGB(168, 178, 190),
+			AccentTint = Color3.fromRGB(140, 220, 235),
+			Sky = Color3.fromRGB(160, 190, 210),
+		},
+	},
+}
+
+-- Landmarks are placed in world space on/around the creature by WorldBuilder and
+-- detected by proximity. Add entries here; no service changes needed.
+BiomeConfig.Landmarks = {
+	{
+		Id = "WhisperingHollow",
+		Name = "Whispering Hollow",
+		Position = Vector3.new(-92, 42, -40),
+		Radius = 12,
+		Xp = 25,
+		Lore = "A hollow beneath the moss where the wind hums old migration songs.",
+	},
+	{
+		Id = "SentinelStone",
+		Name = "Sentinel Stone",
+		Position = Vector3.new(60, 41, 88),
+		Radius = 12,
+		Xp = 25,
+		Lore = "A weathered watcher, carved long before the last migration route faded.",
+	},
+	{
+		Id = "TailSpire",
+		Name = "The Tail Spire",
+		Position = Vector3.new(18, 60, -166),
+		Radius = 12,
+		Xp = 40,
+		Lore = "The highest point of Aruun. From here the migration road looks endless.",
+	},
+	{
+		Id = "HiddenGarden",
+		Name = "The Hidden Garden",
+		Position = Vector3.new(106, 34, 10),
+		Radius = 12,
+		Xp = 40,
+		Lore = "Behind the waterfall, life insisted on continuing. Someone planted hope here.",
+	},
+	{
+		Id = "LanternCrest",
+		Name = "Lantern Crest",
+		Position = Vector3.new(26, 46, 148),
+		Radius = 12,
+		Xp = 30,
+		Lore = "Terraces below the great brow, where Aruun's lantern-glow is warmest.",
+	},
+}
+
+return BiomeConfig
+</ProtectedString>
+</Properties>
+</Item>
+<Item class="ModuleScript" referent="RBX7">
+<Properties>
+<string name="Name">BuildingConfig</string>
+<ProtectedString name="Source">-- Path: ReplicatedStorage/BeastboundShared/BuildingConfig
+-- Construction catalogue. Server validates every field here before building.
+
+local BuildingConfig = {}
+
+BuildingConfig.ById = {
+	Shelter = {
+		Id = "Shelter",
+		DisplayName = "Basic Shelter",
+		Category = "Settlement",
+		Description = "A warm driftwood home with a leaf roof. The first mark of a settlement.",
+		Cost = { Driftwood = 8, Stone = 4 },
+		UnlockLevel = 1,
+		XpOnBuild = 30,
+		BondGain = 3,
+		Inventory = { Driftwood = 2, Stone = 5 }, -- small passive harvest every cycle (future use)
+	},
+	LookoutTower = {
+		Id = "LookoutTower",
+		DisplayName = "Lookout Tower",
+		Category = "Special",
+		Description = "Climb high and watch the migration road. Reveals far-away landmarks.",
+		Cost = { Driftwood = 12, Stone = 10 },
+		UnlockLevel = 3,
+		XpOnBuild = 45,
+		BondGain = 3,
+	},
+	ResonanceBeacon = {
+		Id = "ResonanceBeacon",
+		DisplayName = "Resonance Beacon",
+		Category = "Creature",
+		Description = "A glowseed lens that sings to Aruun. Strengthens the bond with the creature.",
+		Cost = { Stone = 8, Glowseed = 10 },
+		UnlockLevel = 2,
+		XpOnBuild = 50,
+		BondGain = 8,
+	},
+}
+
+BuildingConfig.Order = { "Shelter", "LookoutTower", "ResonanceBeacon" }
+
+return BuildingConfig
+</ProtectedString>
+</Properties>
+</Item>
+<Item class="ModuleScript" referent="RBX8">
+<Properties>
+<string name="Name">Config</string>
+<ProtectedString name="Source">--!strict
+-- Path: ReplicatedStorage/BeastboundShared/Config
+-- Global tuning constants. Change values here, not inside systems.
+
+local Config = {
+	-- Data / persistence
+	DataStoreName = "Beastbound_PlayerData_v1",
+	AutosaveIntervalSeconds = 60,
+	MaxSaveRetries = 3,
+
+	-- Progression
+	LevelXpThresholds = { 0, 60, 140, 260, 420, 640, 920, 1270, 1700, 2220, 2850 }, -- index = level 1..11
+	XpRewards = {
+		Gather = 3,
+		Contribute = 6,
+		Build = 30,
+		Discover = 25,
+		ProjectCompleteBonus = 60,
+	},
+
+	-- Gathering
+	NodeRespawnSeconds = 14,
+	MaxGatherDistance = 14, -- sanity check beyond ProximityPrompt distance
+	RareDoubleChance = 0.12,
+
+	-- Building
+	BuildRateLimitSeconds = 2,
+	MaxRotationSteps = 4, -- rotation validated server-side
+
+	-- Journey (community "migration momentum")
+	JourneyMomentumPerMinute = 1.5,
+	JourneyMomentumPerDiscover = 12,
+	JourneyMomentumPerBuild = 8,
+	JourneyMomentumPerProject = 120,
+
+	-- Creature bond
+	BondPerContribution = 2,
+	BondPerBuild = 3,
+	BondPerDiscover = 4,
+	BondMaxLevel = 8,
+
+	-- Community project
+	HeartrootGlowseedsNeeded = 40,
+	ContributeChunk = 5, -- per interaction, clamped to what the player holds
+
+	WorldSeedSafe = true, -- reserved for future procedural variation
+}
+
+return Config
+</ProtectedString>
+</Properties>
+</Item>
+<Item class="ModuleScript" referent="RBX9">
+<Properties>
+<string name="Name">Net</string>
+<ProtectedString name="Source">-- Path: ReplicatedStorage/BeastboundShared/Net
+-- Single source of truth for remote objects.
+-- Server: creates missing remotes on demand. Client: waits for them.
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local NET_FOLDER_NAME = "BeastboundRemotes"
+
+local Net = {}
+
+local function getFolder()
+	local folder = ReplicatedStorage:FindFirstChild(NET_FOLDER_NAME)
+	if not folder then
+		folder = Instance.new("Folder")
+		folder.Name = NET_FOLDER_NAME
+		folder.Parent = ReplicatedStorage
+	end
+	return folder
+end
+
+local function createRemoteClass(name: string): string
+	if name:sub(-2) == "Fn" then
+		return "RemoteFunction"
+	end
+	return "RemoteEvent"
+end
+
+function Net.get(name: string): any
+	local folder = getFolder()
+	local remote = folder:FindFirstChild(name)
+	if remote then
+		return remote
+	end
+
+	local isServer = game:GetService("RunService"):IsServer()
+	if isServer then
+		remote = Instance.new(createRemoteClass(name))
+		remote.Name = name
+		remote.Parent = folder
+		return remote
+	end
+
+	return folder:WaitForChild(name)
+end
+
+return Net
+</ProtectedString>
+</Properties>
+</Item>
+<Item class="ModuleScript" referent="RBX10">
+<Properties>
+<string name="Name">QuestConfig</string>
+<ProtectedString name="Source">-- Path: ReplicatedStorage/BeastboundShared/QuestConfig
+-- Sequential onboarding objectives. Add quests here; QuestService walks the list.
+
+local QuestConfig = {}
+
+QuestConfig.Quests = {
+	{
+		Id = "KindleGlow",
+		Title = "Gather 5 Glowseeds",
+		Tag = "gather:Glowseed",
+		Target = 5,
+		RewardXp = 20,
+		Hint = "Glowseed clusters grow on the middle terraces of Aruun's back.",
+	},
+	{
+		Id = "Heartlight",
+		Title = "Feed the Heartroot 5 Glowseeds",
+		Tag = "contribute",
+		Target = 5,
+		RewardXp = 30,
+		Hint = "Contribute Glowseeds at the Heartroot in the central plaza.",
+	},
+	{
+		Id = "FirstRoof",
+		Title = "Build a Basic Shelter",
+		Tag = "build",
+		Target = 1,
+		RewardXp = 40,
+		Hint = "Claim a plot ring and open the Build menu.",
+	},
+	{
+		Id = "Wayfinder",
+		Title = "Discover a Landmark",
+		Tag = "discover",
+		Target = 1,
+		RewardXp = 40,
+		Hint = "Explore the edges of Aruun: hollows, spires and gardens hide there.",
+	},
+	{
+		Id = "OnwardStage",
+		Title = "Follow the Migration to Stage 2",
+		Tag = "journey",
+		Target = 2,
+		RewardXp = 60,
+		Hint = "Community projects and discoveries push the migration onward.",
+	},
+	{
+		Id = "BondKeeper",
+		Title = "Reach Bond Level 2 with Aruun",
+		Tag = "bond",
+		Target = 2,
+		RewardXp = 50,
+		Hint = "Beacons, buildings and Heartroot light deepen the bond.",
+	},
+}
+
+QuestConfig.IdleTitle = "Explore freely. Restore the terraces. The First Garden lies far ahead."
+
+return QuestConfig
+</ProtectedString>
+</Properties>
+</Item>
+<Item class="ModuleScript" referent="RBX11">
+<Properties>
+<string name="Name">ResourceConfig</string>
+<ProtectedString name="Source">-- Path: ReplicatedStorage/BeastboundShared/ResourceConfig
+-- Resource definitions used by gathering, inventory and building cost checks.
+
+local ResourceConfig = {}
+
+ResourceConfig.Order = { "Driftwood", "Stone", "Glowseed" }
+
+ResourceConfig.ById = {
+	Driftwood = {
+		Id = "Driftwood",
+		DisplayName = "Driftwood",
+		IconColor = Color3.fromRGB(196, 141, 84),
+		Material = Enum.Material.WoodPlanks,
+		DropMin = 1,
+		DropMax = 2,
+		Description = "Weathered wood gathered across the back of Aruun. Good for shelter frames.",
+	},
+	Stone = {
+		Id = "Stone",
+		DisplayName = "Stone",
+		IconColor = Color3.fromRGB(150, 152, 158),
+		Material = Enum.Material.Slate,
+		DropMin = 1,
+		DropMax = 2,
+		Description = "Broken terrace rock. Used for foundations and infrastructure.",
+	},
+	Glowseed = {
+		Id = "Glowseed",
+		DisplayName = "Glowseed",
+		IconColor = Color3.fromRGB(120, 255, 190),
+		Material = Enum.Material.Neon,
+		DropMin = 1,
+		DropMax = 1,
+		Description = "A warm, living seed. Feeds the Heartroot and restoration projects.",
+	},
+}
+
+return ResourceConfig
+</ProtectedString>
+</Properties>
+</Item>
+<Item class="ModuleScript" referent="RBX12">
+<Properties>
+<string name="Name">Types</string>
+<ProtectedString name="Source">-- Path: ReplicatedStorage/BeastboundShared/Types
+-- Lightweight shared type documentation (for tooling / future strict adoption).
+
+export type ResourceId = "Driftwood" | "Stone" | "Glowseed"
+
+export type Cost = { [string]: number }
+
+export type Profile = {
+	schemaVersion: number,
+	level: number,
+	xp: number,
+	inventory: { [string]: number },
+	counts: {
+		gathered: number,
+		built: number,
+		contributed: number,
+		discoveries: number,
+	},
+	discoveredLandmarks: { [string]: boolean },
+	plots: { [string]: string }, -- plotId -&gt; structureId
+	quests: {
+		index: number,
+		progress: number,
+	},
+	journeyStageSeen: number,
+}
+
+return true
+</ProtectedString>
+</Properties>
+</Item>
+</Item>
+</Item>
+<Item class="ServerScriptService" referent="RBX13">
+<Properties>
+<string name="Name">ServerScriptService</string>
+</Properties>
+<Item class="Script" referent="RBX14">
+<Properties>
+<string name="Name">BeastboundBootstrap</string>
+<ProtectedString name="Source">-- Path: ServerScriptService/BeastboundBootstrap (Script)
+-- Milestone vertical-slice entry point: builds the world, wires every
+-- service once, then handles player lifecycle.
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Modules = script.Parent:WaitForChild("BeastboundModules")
+local RemotesService = require(Modules.RemotesService)
+local WorldBuilder = require(Modules.WorldBuilder)
+local CreatureService = require(Modules.CreatureService)
+local JourneyService = require(Modules.JourneyService)
+local SyncService = require(Modules.SyncService)
+local QuestService = require(Modules.QuestService)
+local InteractionService = require(Modules.InteractionService)
+local BuildingService = require(Modules.BuildingService)
+local ProjectService = require(Modules.ProjectService)
+local ProgressionService = require(Modules.ProgressionService)
+local PlayerDataService = require(Modules.PlayerDataService)
+
+-- 1. Remotes must exist before any client asks for them.
+RemotesService.init()
+
+-- 2. Build the shared world once per server.
+local world = WorldBuilder.build()
+
+-- 3. Services (explicit dependency graph, no require cycles).
+local deps = {
+	RemotesService = RemotesService,
+	PlayerDataService = PlayerDataService,
+	ProgressionService = ProgressionService,
+	QuestService = QuestService,
+	InteractionService = InteractionService,
+	BuildingService = BuildingService,
+	ProjectService = ProjectService,
+	CreatureService = CreatureService,
+	JourneyService = JourneyService,
+	SyncService = SyncService,
+}
+
+CreatureService.init(world)
+ProgressionService.init(deps)
+QuestService.init(deps)
+SyncService.init(deps)
+JourneyService.init(deps, world)
+InteractionService.init(deps, world)
+InteractionService.setProjectService(ProjectService)
+BuildingService.init(deps, world)
+ProjectService.init(deps, world)
+
+-- 4. Creature bond reacts to milestones; push world state on level-ups.
+CreatureService.onBondChanged(function(_level)
+	SyncService.worldBroadcast()
+end)
+
+-- 5. Player lifecycle (join-in-progress: full snapshot on load; returning
+-- players get their structures rebuilt on their plots).
+PlayerDataService.setOnProfileReady(function(player)
+	BuildingService.restoreFromProfile(player)
+	SyncService.playerSync(player)
+	SyncService.worldBroadcast()
+end)
+
+local function onPlayerAdded(player)
+	PlayerDataService.setupPlayer(player)
+end
+
+Players.PlayerAdded:Connect(onPlayerAdded)
+for _, player in ipairs(Players:GetPlayers()) do
+	task.spawn(onPlayerAdded, player)
+end
+
+-- 6. Persistence heartbeat.
+PlayerDataService.startAutosave()
+
+print("[Beastbound] The Great Migration — server systems online. Aruun is walking.")
+</ProtectedString>
+</Properties>
+</Item>
+<Item class="Folder" referent="RBX15">
+<Properties>
+<string name="Name">BeastboundModules</string>
+</Properties>
+<Item class="ModuleScript" referent="RBX16">
+<Properties>
+<string name="Name">BuilderKit</string>
+<ProtectedString name="Source">-- Path: ServerScriptService/BeastboundModules/BuilderKit
+-- Procedural construction helpers. Every world asset is generated from code so
+-- the project needs zero external model files.
+
+local BuilderKit = {}
+
+function BuilderKit.part(props)
+	local part = Instance.new(props.className or "Part")
+	if props.shape then
+		part.Shape = props.shape
+	end
+	part.Name = props.name or "KitPart"
+	part.Size = props.size or Vector3.new(4, 4, 4)
+	part.CFrame = props.cframe or CFrame.new(0, 0, 0)
+	part.Color = props.color or Color3.fromRGB(160, 160, 160)
+	part.Material = props.material or Enum.Material.SmoothPlastic
+	part.Anchored = props.anchored ~= false
+	part.CanCollide = props.canCollide ~= false
+	part.CanQuery = props.canQuery ~= false
+	part.CanTouch = false
+	part.CastShadow = props.castShadow ~= false
+	part.Transparency = props.transparency or 0
+	part.Reflectance = props.reflectance or 0
+	if props.parent then
+		part.Parent = props.parent
+	end
+	return part
+end
+
+function BuilderKit.sphere(props)
+	local copy = table.clone(props)
+	copy.shape = Enum.PartType.Ball
+	return BuilderKit.part(copy)
+end
+
+function BuilderKit.wedge(props)
+	local copy = table.clone(props)
+	copy.shape = Enum.PartType.Wedge
+	return BuilderKit.part(copy)
+end
+
+-- Upright cylinder: props.size = Vector3.new(height, diameter, diameter)
+function BuilderKit.pillar(props)
+	local part = BuilderKit.part(props)
+	part.Shape = Enum.PartType.Cylinder
+	part.Size = props.size or Vector3.new(10, 4, 4)
+	part.CFrame = (props.cframe or CFrame.new(0, 0, 0)) * CFrame.Angles(0, 0, math.rad(90))
+	return part
+end
+
+-- Solid ramp between two points. a/b are Vector3 surface positions.
+function BuilderKit.ramp(props)
+	local a, b = props.a, props.b
+	local mid = (a + b) / 2
+	local dist = (b - a).Magnitude
+	local cf = CFrame.lookAt(mid + Vector3.new(0, 0.6, 0), b)
+	return BuilderKit.part({
+		parent = props.parent,
+		name = props.name or "Ramp",
+		size = Vector3.new(props.width or 10, 1.4, dist),
+		cframe = cf,
+		color = props.color,
+		material = props.material or Enum.Material.SmoothPlastic,
+	})
+end
+
+function BuilderKit.glow(props)
+	local part = BuilderKit.part(props)
+	part.Material = Enum.Material.Neon
+	part.Color = props.color or Color3.fromRGB(120, 255, 190)
+	part.Anchored = true
+	return part
+end
+
+function BuilderKit.pointLight(parent, color, brightness, range)
+	local light = Instance.new("PointLight")
+	light.Color = color
+	light.Brightness = brightness
+	light.Range = range
+	light.Parent = parent
+	return light
+end
+
+function BuilderKit.sparkle(parent, color, rate, speed, lifetime)
+	local emitter = Instance.new("ParticleEmitter")
+	emitter.Color = ColorSequence.new(color)
+	emitter.Rate = rate
+	emitter.Speed = NumberRange.new(speed * 0.25, speed)
+	emitter.Lifetime = NumberRange.new(lifetime * 0.6, lifetime)
+	emitter.Size = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.6),
+		NumberSequenceKeypoint.new(1, 0),
+	})
+	emitter.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.2),
+		NumberSequenceKeypoint.new(1, 1),
+	})
+	emitter.SpreadAngle = Vector2.new(35, 35)
+	emitter.LightEmission = 0.8
+	emitter.Parent = parent
+	return emitter
+end
+
+function BuilderKit.playSoundAt(position, soundDef)
+	local holder = Instance.new("Part")
+	holder.Name = "BeastboundSFX"
+	holder.Size = Vector3.new(1, 1, 1)
+	holder.Position = position
+	holder.Anchored = true
+	holder.CanCollide = false
+	holder.CanQuery = false
+	holder.Transparency = 1
+	holder.Parent = workspace
+
+	local sound = Instance.new("Sound")
+	sound.SoundId = soundDef.SoundId
+	sound.Volume = soundDef.Volume or 0.7
+	sound.PlaybackSpeed = soundDef.Pitch or 1
+	sound.RollOffMaxDistance = 260
+	sound.Parent = holder
+	sound.Ended:Once(function()
+		holder:Destroy()
+	end)
+	sound:Play()
+	task.delay(8, function()
+		if holder.Parent then
+			holder:Destroy()
+		end
+	end)
+end
+
+return BuilderKit
+</ProtectedString>
+</Properties>
+</Item>
+<Item class="ModuleScript" referent="RBX17">
+<Properties>
+<string name="Name">BuildingService</string>
+<ProtectedString name="Source">-- Path: ServerScriptService/BeastboundModules/BuildingService
+-- Plot-based construction. The server owns: costs, unlocks, ownership,
+-- placement validity, rate limits. Clients only ever submit intentions.
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Shared = ReplicatedStorage:WaitForChild("BeastboundShared")
+local Config = require(Shared.Config)
+local BuildingConfig = require(Shared.BuildingConfig)
+local AudioConfig = require(Shared.AudioConfig)
+
+local Kit = require(script.Parent.BuilderKit)
+local StructureBuilder = require(script.Parent.StructureBuilder)
+
+local BuildingService = {}
+
+local PlayerDataService, RemotesService, QuestService, ProgressionService, CreatureService, JourneyService, SyncService
+local plots = {}           -- plotId -&gt; pad part
+local plotOccupants = {}   -- plotId -&gt; { userId = n, structureId = s }
+local lastBuild = {}       -- [player] = timestamp
+
+function BuildingService.init(deps, worldHandle)
+	PlayerDataService = deps.PlayerDataService
+	RemotesService = deps.RemotesService
+	QuestService = deps.QuestService
+	ProgressionService = deps.ProgressionService
+	CreatureService = deps.CreatureService
+	JourneyService = deps.JourneyService
+	SyncService = deps.SyncService
+
+	for plotId, pad in pairs(worldHandle.plots) do
+		plots[plotId] = pad
+		plotOccupants[plotId] = nil
+	end
+
+	RemotesService.remote("BuildRequest").OnServerEvent:Connect(BuildingService.onBuildRequest)
+end
+
+--=====================================================================
+-- Validation
+--=====================================================================
+
+local function costAffordable(profile, cost)
+	for resourceId, amount in pairs(cost or {}) do
+		if (profile.inventory[resourceId] or 0) &lt; amount then
+			return false
+		end
+	end
+	return true
+end
+
+local function nearCharacter(player, position)
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	if not root then
+		return false
+	end
+	local dx = root.Position.X - position.X
+	local dz = root.Position.Z - position.Z
+	return math.sqrt(dx * dx + dz * dz) &lt;= 30
+end
+
+function BuildingService.onBuildRequest(player, structureId, plotId, rotationStep)
+	if type(structureId) ~= "string" or type(plotId) ~= "string" or type(rotationStep) ~= "number" then
+		return
+	end
+
+	local now = os.clock()
+	if lastBuild[player] and now - lastBuild[player] &lt; Config.BuildRateLimitSeconds then
+		return
+	end
+	lastBuild[player] = now
+
+	local pad = plots[plotId]
+	if not pad then
+		return
+	end
+	if type(rotationStep) ~= "number" or rotationStep % 1 ~= 0 or rotationStep &lt; 0 or rotationStep &gt;= Config.MaxRotationSteps then
+		return
+	end
+	if not nearCharacter(player, pad.Position) then
+		RemotesService.toast(player, "Too far", "Walk up to the plot you want to build on.", "warn")
+		return
+	end
+
+	local occupant = plotOccupants[plotId]
+	if occupant and occupant.userId ~= player.UserId then
+		RemotesService.toast(player, "Plot occupied", "Another wayfarer already built here.", "warn")
+		return
+	end
+
+	local def = BuildingConfig.ById[structureId]
+	if not def then
+		return
+	end
+
+	local profile = PlayerDataService.get(player)
+	if not profile then
+		return
+	end
+	if profile.level &lt; (def.UnlockLevel or 1) then
+		RemotesService.toast(player, "Locked", def.DisplayName .. " requires level " .. tostring(def.UnlockLevel) .. ".", "warn")
+		return
+	end
+	if not costAffordable(profile, def.Cost) then
+		RemotesService.toast(player, "Not enough resources", "You need more materials for " .. def.DisplayName .. ".", "warn")
+		return
+	end
+
+	for resourceId, amount in pairs(def.Cost or {}) do
+		if not PlayerDataService.takeItem(player, resourceId, amount) then
+			return -- re-validated to defeat races between count and take
+		end
+	end
+
+	-- all checks passed: place
+	plotOccupants[plotId] = { userId = player.UserId, structureId = structureId }
+	pad:SetAttribute("OwnerUserId", player.UserId)
+	pad:SetAttribute("StructureId", structureId)
+	PlayerDataService.markPlot(player, plotId, structureId)
+
+	local model = StructureBuilder.build(structureId, pad.CFrame, rotationStep)
+	model:SetAttribute("OwnerUserId", player.UserId)
+	model:SetAttribute("OwnerName", player.DisplayName)
+	model.Parent = pad.Parent
+
+	local label = Instance.new("BillboardGui")
+	label.Name = "OwnerLabel"
+	label.Size = UDim2.fromScale(6, 1.4)
+	label.StudsOffset = Vector3.new(0, 8, 0)
+	label.MaxDistance = 60
+	local text = Instance.new("TextLabel")
+	text.Size = UDim2.fromScale(1, 1)
+	text.BackgroundTransparency = 1
+	text.Font = Enum.Font.GothamMedium
+	text.TextScaled = true
+	text.TextColor3 = Color3.fromRGB(230, 240, 230)
+	text.TextStrokeTransparency = 0.6
+	text.Text = def.DisplayName .. " — " .. player.DisplayName
+	text.Parent = label
+	label.Parent = model:FindFirstChildWhichIsA("BasePart")
+
+	StructureBuilder.fadeIn(model, 1.4)
+	Kit.playSoundAt(pad.Position, AudioConfig.Build)
+	Kit.sparkle(pad, Color3.fromRGB(200, 230, 200), 10, 6, 1)
+
+	profile.counts.built += 1
+	ProgressionService.award(player, Config.XpRewards.Build)
+	CreatureService.addBond(def.BondGain or 1)
+	JourneyService.addMomentum(Config.JourneyMomentumPerBuild)
+	CreatureService.react("build", pad.Position)
+	QuestService.mark(player, "build")
+	SyncService.playerSync(player)
+	RemotesService.toast(player, "Built: " .. def.DisplayName, "+" .. Config.XpRewards.Build .. " XP", "build")
+end
+
+--=====================================================================
+-- Join-in-progress: returning players reclaim their structures
+--=====================================================================
+
+function BuildingService.restoreFromProfile(player)
+	local profile = PlayerDataService.get(player)
+	if not profile then
+		return
+	end
+	for plotId, structureId in pairs(profile.plots) do
+		local pad = plots[plotId]
+		if pad and BuildingConfig.ById[structureId] and plotOccupants[plotId] == nil then
+			plotOccupants[plotId] = { userId = player.UserId, structureId = structureId }
+			pad:SetAttribute("OwnerUserId", player.UserId)
+			pad:SetAttribute("StructureId", structureId)
+			local model = StructureBuilder.build(structureId, pad.CFrame, 0)
+			model:SetAttribute("OwnerUserId", player.UserId)
+			model:SetAttribute("OwnerName", player.DisplayName)
+			model.Parent = pad.Parent
+			for _, part in ipairs(model:GetDescendants()) do
+				if part:IsA("BasePart") then
+					part.Transparency = 0
+				end
+			end
+		end
+	end
+end
+
+function BuildingService.buildCatalogueFor(player)
+	local profile = PlayerDataService.get(player)
+	local catalogue = {}
+	for _, id in ipairs(BuildingConfig.Order) do
+		local def = BuildingConfig.ById[id]
+		local unlocked = profile and profile.level &gt;= (def.UnlockLevel or 1)
+		table.insert(catalogue, {
+			id = def.Id,
+			name = def.DisplayName,
+			category = def.Category,
+			description = def.Description,
+			cost = def.Cost,
+			unlockLevel = def.UnlockLevel,
+			unlocked = unlocked == true,
+		})
+	end
+	return catalogue
+end
+
+return BuildingService
+</ProtectedString>
+</Properties>
+</Item>
+<Item class="ModuleScript" referent="RBX18">
+<Properties>
+<string name="Name">CreatureService</string>
+<ProtectedString name="Source">-- Path: ServerScriptService/BeastboundModules/CreatureService
+-- Aruun's life signals: breathing/sway rig animation via Motor6D.Transform,
+-- reactions to gameplay events, community bond level, glow feedback.
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local Shared = ReplicatedStorage:WaitForChild("BeastboundShared")
+local Config = require(Shared.Config)
+local AudioConfig = require(Shared.AudioConfig)
+
+local Kit = require(script.Parent.BuilderKit)
+
+local CreatureService = {}
+
+local world
+local state = {
+	bondPoints = 0,
+	bondLevel = 1,
+	reaction = 0,       -- 0..1 decaying envelope
+	reactionKind = nil,
+	headLook = nil,     -- Vector3 interest point
+	headLookUntil = 0,
+}
+local BondLevels = {
+	[1] = "Distant",
+	[2] = "Aware",
+	[3] = "Trusting",
+	[4] = "Entwined",
+	[5] = "Kindred",
+	[6] = "Bonded",
+	[7] = "One Path",
+	[8] = "One Heart",
+}
+local bondListeners = {}
+
+function CreatureService.init(worldHandle)
+	world = worldHandle
+	RunService.Heartbeat:Connect(CreatureService.onHeartbeat)
+end
+
+function CreatureService.onBondChanged(callback)
+	table.insert(bondListeners, callback)
+end
+
+function CreatureService.bondSnapshot()
+	return {
+		level = state.bondLevel,
+		name = BondLevels[state.bondLevel] or "Bonded",
+		points = state.bondPoints,
+	}
+end
+
+--=====================================================================
+-- Reactions
+--=====================================================================
+
+local Reactions = {
+	gather = { pitch = 0.14, yaw = 0.05, duration = 1.4, sound = AudioConfig.Gather, look = true },
+	build = { pitch = 0.3, yaw = 0.14, duration = 2.6, sound = AudioConfig.CreaturePurr, look = true },
+	contribute = { pitch = 0.4, yaw = 0.1, duration = 3, sound = AudioConfig.CreaturePurr, glow = true },
+	discover = { pitch = 0.22, yaw = 0.2, duration = 2.4, sound = AudioConfig.Discover, look = true },
+	stage = { pitch = 0.5, yaw = 0.3, duration = 5, sound = AudioConfig.CreatureCall },
+	restored = { pitch = 0.7, yaw = 0.5, duration = 6, sound = AudioConfig.ProjectComplete, glow = true },
+}
+
+function CreatureService.react(kind, atPosition)
+	local reaction = Reactions[kind]
+	if not reaction or not world then
+		return
+	end
+	state.reaction = 1
+	state.reactionKind = kind
+	state.reactionUntil = os.clock() + reaction.duration
+
+	if reaction.look and atPosition then
+		state.headLook = atPosition
+		state.headLookUntil = os.clock() + reaction.duration
+	end
+
+	if reaction.sound and world.refs.lantern then
+		Kit.playSoundAt(world.refs.lantern.Position, reaction.sound)
+	end
+
+	if reaction.glow then
+		CreatureService.glowWave()
+	end
+end
+
+function CreatureService.glowWave()
+	if not world or not world.tintGroups then
+		return
+	end
+	for _, part in ipairs(world.tintGroups.AccentTint) do
+		if part:IsDescendantOf(workspace) then
+			local original = part.Transparency
+			local tween = TweenService:Create(part, TweenInfo.new(0.9, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+				Transparency = math.max(original - 0.3, 0),
+			})
+			tween:Play()
+			task.delay(1.2, function()
+				if part.Parent then
+					TweenService:Create(part, TweenInfo.new(1.4), { Transparency = original }):Play()
+				end
+			end)
+		end
+	end
+end
+
+--=====================================================================
+-- Bond
+--=====================================================================
+
+function CreatureService.addBond(amount)
+	state.bondPoints += amount
+	local newLevel = math.clamp(1 + math.floor(state.bondPoints / 30), 1, Config.BondMaxLevel)
+	if newLevel &gt; state.bondLevel then
+		state.bondLevel = newLevel
+		CreatureService.react("restored")
+		for _, callback in ipairs(bondListeners) do
+			task.spawn(callback, state.bondLevel)
+		end
+	end
+end
+
+--=====================================================================
+-- Animation: one cheap Heartbeat pass over two Motor6Ds
+--=====================================================================
+
+local function headTransform(now)
+	local breath = math.sin(now * 1.1) * 0.02
+	local sway = math.sin(now * 0.23) * 0.05
+	local pitch = 0
+	local yaw = 0
+
+	if state.reactionKind then
+		local kickEnvelope = math.clamp(1 - (state.reactionUntil - now) / 2, 0, 1)
+		local reaction = Reactions[state.reactionKind or "gather"]
+		if reaction then
+			pitch = reaction.pitch * math.sin(now * 2.6) * kickEnvelope
+			yaw = reaction.yaw * math.sin(now * 1.7) * kickEnvelope
+		end
+	end
+
+	-- look toward points of interest
+	if state.headLook and now &lt; state.headLookUntil and world.refs.head then
+		local headPosition = world.refs.head.Position
+		local delta = state.headLook - headPosition
+		local flatDelta = Vector3.new(delta.X, 0, delta.Z)
+		if flatDelta.Magnitude &gt; 1 then
+			-- creature faces +Z: yaw is measured against that axis
+			local targetYaw = math.atan2(delta.X, delta.Z)
+			yaw += math.clamp(targetYaw, -0.9, 0.9) * 0.35
+		end
+	end
+
+	return CFrame.new(0, breath * 2, 0) * CFrame.Angles(pitch + breath, yaw + sway, sway * 0.5)
+end
+
+local function tailTransform(now)
+	local sway = math.sin(now * 0.31) * 0.25
+	local breath = math.sin(now * 1.1 + 1.2) * 0.03
+	return CFrame.Angles(0, sway, 0) * CFrame.new(0, breath, 0)
+end
+
+function CreatureService.onHeartbeat()
+	if not world then
+		return
+	end
+	local now = os.clock()
+
+	if state.reactionKind and now &gt; state.reactionUntil then
+		state.reactionKind = nil
+		state.reaction = 0
+	end
+
+	if world.refs.NeckJoint then
+		world.refs.NeckJoint.Transform = headTransform(now)
+	end
+	if world.refs.TailJoint then
+		world.refs.TailJoint.Transform = tailTransform(now)
+	end
+end
+
+return CreatureService
+</ProtectedString>
+</Properties>
+</Item>
+<Item class="ModuleScript" referent="RBX19">
+<Properties>
+<string name="Name">InteractionService</string>
+<ProtectedString name="Source">-- Path: ServerScriptService/BeastboundModules/InteractionService
+-- Gathering + landmark discovery. All grants are server-side; the client never
+-- sends a gather request at all (ProximityPrompt.Triggered is authoritative and
+-- distance-limited by the engine).
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Shared = ReplicatedStorage:WaitForChild("BeastboundShared")
+local Config = require(Shared.Config)
+local ResourceConfig = require(Shared.ResourceConfig)
+local BiomeConfig = require(Shared.BiomeConfig)
+local AudioConfig = require(Shared.AudioConfig)
+
+local Kit = require(script.Parent.BuilderKit)
+
+local InteractionService = {}
+
+local PlayerDataService, RemotesService, QuestService, ProgressionService, CreatureService, JourneyService, SyncService
+
+local lastGather = {} -- [node] = timestamp
+
+function InteractionService.init(deps, worldHandle)
+	PlayerDataService = deps.PlayerDataService
+	RemotesService = deps.RemotesService
+	QuestService = deps.QuestService
+	ProgressionService = deps.ProgressionService
+	CreatureService = deps.CreatureService
+	JourneyService = deps.JourneyService
+	SyncService = deps.SyncService
+
+	InteractionService.wireNodes(worldHandle.creature.GatherNodes)
+	InteractionService.wireHeartrootAltar(worldHandle)
+	InteractionService.startLandmarkScan(worldHandle.creature)
+end
+
+--=====================================================================
+-- Gather nodes
+--=====================================================================
+
+function InteractionService.wireNodes(nodesFolder)
+	for _, node in ipairs(nodesFolder:GetChildren()) do
+		local primary = node.PrimaryPart
+		if primary then
+			local prompt = Instance.new("ProximityPrompt")
+			prompt.ActionText = "Gather"
+			prompt.ObjectText = ResourceConfig.ById[node:GetAttribute("ResourceId")].DisplayName
+			prompt.HoldDuration = 0.7
+			prompt.MaxActivationDistance = 10
+			prompt.RequiresLineOfSight = false
+			prompt.Enabled = true
+			prompt.Parent = primary
+			prompt.Triggered:Connect(function(player)
+				InteractionService.gather(player, node)
+			end)
+		end
+	end
+end
+
+function InteractionService.gather(player, node)
+	if node:GetAttribute("Available") ~= true then
+		return
+	end
+
+	local now = os.clock()
+	if lastGather[node] and now - lastGather[node] &lt; Config.NodeRespawnSeconds then
+		return
+	end
+
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	local primary = node.PrimaryPart
+	if not root or not primary then
+		return
+	end
+	-- defense in depth beyond the prompt's own activation distance
+	if (root.Position - primary.Position).Magnitude &gt; Config.MaxGatherDistance then
+		return
+	end
+
+	local resourceId = node:GetAttribute("ResourceId")
+	local def = ResourceConfig.ById[resourceId]
+	if not def then
+		return
+	end
+
+	lastGather[node] = now
+	node:SetAttribute("Available", false)
+
+	-- hide visuals, dim prompt feedback
+	for _, part in ipairs(node:GetDescendants()) do
+		if part:IsA("BasePart") then
+			part.Transparency = part.Material == Enum.Material.Neon and 1 or 0.85
+		end
+	end
+	Kit.playSoundAt(primary.Position, AudioConfig.Gather)
+
+	local amount = def.DropMin
+	if def.DropMax &gt; def.DropMin and math.random() &lt; Config.RareDoubleChance then
+		amount = def.DropMax
+	end
+	PlayerDataService.addItem(player, resourceId, amount)
+
+	local profile = PlayerDataService.get(player)
+	if profile then
+		profile.counts.gathered += amount
+	end
+
+	ProgressionService.award(player, Config.XpRewards.Gather)
+	QuestService.mark(player, "gather:" .. resourceId)
+	CreatureService.react("gather", primary.Position)
+	SyncService.playerSync(player)
+
+	-- respawn (all node parts are opaque by default; restoreNodeVisuals is safe)
+	task.delay(Config.NodeRespawnSeconds, function()
+		if node.Parent then
+			InteractionService.restoreNodeVisuals(node)
+			node:SetAttribute("Available", true)
+		end
+	end)
+end
+
+function InteractionService.restoreNodeVisuals(node)
+	for _, part in ipairs(node:GetDescendants()) do
+		if part:IsA("BasePart") then
+			if part.Material == Enum.Material.Neon then
+				part.Transparency = 0
+			else
+				part.Transparency = 0
+			end
+		end
+	end
+end
+
+--=====================================================================
+-- Landmark discovery (Atlas-lite)
+--=====================================================================
+
+function InteractionService.startLandmarkScan(creature)
+	local knownThisSession = {}
+	task.spawn(function()
+		while true do
+			task.wait(0.5)
+			for _, player in ipairs(Players:GetPlayers()) do
+				local profile = PlayerDataService.get(player)
+				local character = player.Character
+				local root = character and character:FindFirstChild("HumanoidRootPart")
+				if profile and root then
+					for _, landmark in ipairs(BiomeConfig.Landmarks) do
+						if not profile.discoveredLandmarks[landmark.Id] and not knownThisSession[player.UserId .. landmark.Id] then
+							local dx = root.Position.X - landmark.Position.X
+							local dz = root.Position.Z - landmark.Position.Z
+							if math.sqrt(dx * dx + dz * dz) &lt;= landmark.Radius then
+								knownThisSession[player.UserId .. landmark.Id] = true
+								InteractionService.discover(player, landmark)
+							end
+						end
+					end
+				end
+			end
+		end
+	end)
+end
+
+function InteractionService.discover(player, landmark)
+	local profile = PlayerDataService.get(player)
+	if not profile or profile.discoveredLandmarks[landmark.Id] then
+		return
+	end
+
+	profile.discoveredLandmarks[landmark.Id] = true
+	profile.counts.discoveries += 1
+	ProgressionService.award(player, landmark.Xp or Config.XpRewards.Discover)
+	QuestService.mark(player, "discover")
+	JourneyService.addMomentum(Config.JourneyMomentumPerDiscover)
+	CreatureService.react("discover", landmark.Position)
+
+	RemotesService.toast(player, "Discovered: " .. landmark.Name, landmark.Lore, "discover")
+	SyncService.playerSync(player)
+end
+
+--=====================================================================
+-- Heartroot altar prompt (handled with ProjectService)
+--=====================================================================
+
+local ProjectService
+
+function InteractionService.setProjectService(service)
+	ProjectService = service
+end
+
+function InteractionService.wireHeartrootAltar(worldHandle)
+	local altar = worldHandle.heartroot.Altar
+	local prompt = Instance.new("ProximityPrompt")
+	prompt.ActionText = "Feed Glowseeds"
+	prompt.ObjectText = "The Heartroot"
+	prompt.HoldDuration = 0.6
+	prompt.MaxActivationDistance = 12
+	prompt.RequiresLineOfSight = false
+	prompt.Parent = altar
+	prompt.Triggered:Connect(function(player)
+		if ProjectService then
+			ProjectService.contribute(player)
+		end
+	end)
+end
+
+return InteractionService
+</ProtectedString>
+</Properties>
+</Item>
+<Item class="ModuleScript" referent="RBX20">
+<Properties>
+<string name="Name">JourneyService</string>
+<ProtectedString name="Source">-- Path: ServerScriptService/BeastboundModules/JourneyService
+-- Community migration: momentum accrues from builds, discoveries, projects
+-- and time. Crossing a threshold triggers a full biome transition —
+-- Lighting, Atmosphere, world palette, signpost and creature reaction.
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+local Shared = ReplicatedStorage:WaitForChild("BeastboundShared")
+local Config = require(Shared.Config)
+local BiomeConfig = require(Shared.BiomeConfig)
+local AudioConfig = require(Shared.AudioConfig)
+
+local Kit = require(script.Parent.BuilderKit)
+
+local JourneyService = {}
+
+local PlayerDataService, RemotesService, QuestService, CreatureService, SyncService
+local world
+
+local stage = 0 -- 0 = "not yet started"; bootstrap calls applyStage(1)
+local momentum = 0
+
+function JourneyService.init(deps, worldHandle)
+	PlayerDataService = deps.PlayerDataService
+	RemotesService = deps.RemotesService
+	QuestService = deps.QuestService
+	CreatureService = deps.CreatureService
+	SyncService = deps.SyncService
+	world = worldHandle
+
+	local atmosphere = Lighting:FindFirstChildOfClass("Atmosphere")
+	if not atmosphere then
+		atmosphere = Instance.new("Atmosphere")
+		atmosphere.Parent = Lighting
+	end
+	world.atmosphere = atmosphere
+
+	JourneyService.applyStage(1)
+	JourneyService.startPassiveMomentum()
+end
+
+function JourneyService.snapshot()
+	local current = BiomeConfig.Stages[math.max(stage, 1)]
+	local nextStage = BiomeConfig.Stages[stage + 1]
+	return {
+		stage = math.max(stage, 1),
+		name = current and current.Name or "Mosslight Meadow",
+		headline = current and current.Headline or "",
+		momentum = math.floor(momentum),
+		target = nextStage and nextStage.MomentumTarget or current and current.MomentumTarget or 0,
+		finalStage = nextStage == nil,
+	}
+end
+
+function JourneyService.startPassiveMomentum()
+	task.spawn(function()
+		while true do
+			task.wait(60)
+			JourneyService.addMomentum(Config.JourneyMomentumPerMinute)
+		end
+	end)
+end
+
+function JourneyService.addMomentum(amount)
+	if amount &lt;= 0 then
+		return
+	end
+	momentum += amount
+
+	local nextStage = BiomeConfig.Stages[stage + 1]
+	if nextStage and momentum &gt;= nextStage.MomentumTarget then
+		JourneyService.advance()
+		return
+	end
+	SyncService.worldBroadcast()
+end
+
+function JourneyService.advance()
+	stage += 1
+	JourneyService.applyStage(stage)
+	CreatureService.react("stage")
+	RemotesService.toastAll("Migration onward", "Aruun strides into " .. (BiomeConfig.Stages[stage].Name or "new lands") .. ".", "journey")
+	QuestService.broadcastServerEvent("journey")
+	SyncService.worldBroadcast()
+end
+
+--=====================================================================
+-- Biome transition
+--=====================================================================
+
+local function tweenLighting(thresholds)
+	local env = thresholds.Environment
+	local lightingInfo = TweenInfo.new(8, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
+	for key, value in pairs(env) do
+		if key == "FogColor" then
+			TweenService:Create(Lighting, lightingInfo, { FogColor = value, FogEnd = env.FogEnd or 900 }):Play()
+		elseif key ~= "FogEnd" then
+			TweenService:Create(Lighting, lightingInfo, { [key] = value }):Play()
+		end
+	end
+
+	local atmo = thresholds.Atmosphere
+	if world.atmosphere then
+		TweenService:Create(world.atmosphere, lightingInfo, atmo):Play()
+	end
+end
+
+function JourneyService.applyStage(index)
+	local thresholds = BiomeConfig.Stages[index]
+	if not thresholds then
+		return
+	end
+	stage = index
+	tweenLighting(thresholds)
+
+	-- recolor the tintable world groups toward the new palette
+	local palette = thresholds.Palette
+	local tintTargets = {
+		FoliageTint = palette.FoliageTint,
+		GroundTint = palette.GroundTint,
+		AccentTint = palette.AccentTint,
+	}
+	for group, color in pairs(tintTargets) do
+		for _, part in ipairs(world.tintGroups[group] or {}) do
+			if part.Parent then
+				TweenService:Create(part, TweenInfo.new(6, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), { Color = color }):Play()
+			end
+		end
+	end
+
+	-- update the in-world signpost label
+	if world.refs.signLabel then
+		world.refs.signLabel.Text = thresholds.Name
+	end
+end
+
+return JourneyService
+</ProtectedString>
+</Properties>
+</Item>
+<Item class="ModuleScript" referent="RBX21">
+<Properties>
+<string name="Name">PlayerDataService</string>
+<ProtectedString name="Source">-- Path: ServerScriptService/BeastboundModules/PlayerDataService
+-- Server-authoritative player profiles: loading, validation, mutation API,
+-- autosave, leave/shutdown saves. Persistent progress only; no session state.
+
+local Players = game:GetService("Players")
+local DataStoreService = game:GetService("DataStoreService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local Shared = ReplicatedStorage:WaitForChild("BeastboundShared")
+local Config = require(Shared.Config)
+local ResourceConfig = require(Shared.ResourceConfig)
+
+local SCHEMA_VERSION = 1
+
+local PlayerDataService = {}
+
+local profiles = {}      -- [player] = profile
+local loadFailed = {}    -- [player] = true =&gt; do not overwrite stored data
+local dataStore = nil
+
+pcall(function()
+	dataStore = DataStoreService:GetDataStore(Config.DataStoreName)
+end)
+
+--=====================================================================
+-- Profile shape
+--=====================================================================
+
+local function freshProfile()
+	return {
+		schemaVersion = SCHEMA_VERSION,
+		level = 1,
+		xp = 0,
+		inventory = { Driftwood = 0, Stone = 0, Glowseed = 0 },
+		counts = { gathered = 0, built = 0, contributed = 0, discoveries = 0 },
+		discoveredLandmarks = {},
+		plots = {},
+		quests = { index = 1, progress = 0 },
+		journeyStageSeen = 1,
+	}
+end
+
+local function validResourceName(name)
+	return ResourceConfig.ById[name] ~= nil
+end
+
+local function validate(profile)
+	if type(profile) ~= "table" then
+		return nil
+	end
+	local clean = freshProfile()
+
+	clean.level = math.clamp(tonumber(profile.level) or 1, 1, #Config.LevelXpThresholds)
+	clean.xp = math.max(tonumber(profile.xp) or 0, 0)
+	clean.journeyStageSeen = math.max(tonumber(profile.journeyStageSeen) or 1, 1)
+
+	if type(profile.inventory) == "table" then
+		for key, value in pairs(profile.inventory) do
+			if validResourceName(key) and type(value) == "number" then
+				clean.inventory[key] = math.clamp(math.floor(value), 0, 9999)
+			end
+		end
+	end
+	if type(profile.counts) == "table" then
+		for key, value in pairs(profile.counts) do
+			if type(value) == "number" then
+				clean.counts[key] = math.clamp(math.floor(value), 0, 1e9)
+			end
+		end
+	end
+	if type(profile.discoveredLandmarks) == "table" then
+		for key, value in pairs(profile.discoveredLandmarks) do
+			if value == true then
+				clean.discoveredLandmarks[tostring(key)] = true
+			end
+		end
+	end
+	if type(profile.plots) == "table" then
+		for key, value in pairs(profile.plots) do
+			if type(key) == "string" and type(value) == "string" then
+				clean.plots[key] = value
+			end
+		end
+	end
+	if type(profile.quests) == "table" then
+		clean.quests.index = math.clamp(tonumber(profile.quests.index) or 1, 1, 99)
+		clean.quests.progress = math.max(tonumber(profile.quests.progress) or 0, 0)
+	end
+
+	return clean
+end
+
+--=====================================================================
+-- Persistence
+--=====================================================================
+
+local function loadProfile(player)
+	if not dataStore then
+		return freshProfile()
+	end
+	local ok, stored = pcall(function()
+		return dataStore:GetAsync("player_" .. player.UserId)
+	end)
+	if not ok then
+		warn("[PlayerDataService] load failed for " .. player.Name .. "; profile is provisional")
+		loadFailed[player] = true
+		return freshProfile()
+	end
+	if type(stored) ~= "table" or stored.schemaVersion ~= SCHEMA_VERSION then
+		-- migrate hook: future schema upgrades convert stored data here
+		return freshProfile()
+	end
+	local clean = validate(stored)
+	if not clean then
+		loadFailed[player] = true
+		return freshProfile()
+	end
+	return clean
+end
+
+local function saveProfile(player, force)
+	local profile = profiles[player]
+	if not profile then
+		return
+	end
+	if loadFailed[player] and not force then
+		-- never overwrite real data with a profile we could not load
+		return
+	end
+	if not dataStore then
+		return
+	end
+	local budget = force and Config.MaxSaveRetries or 1
+	for attempt = 1, budget do
+		local ok, err = pcall(function()
+			dataStore:UpdateAsync("player_" .. player.UserId, function(stored)
+				-- stored is never trusted; we always persist our validated profile
+				local _ = stored
+				return profile
+			end)
+		end)
+		if ok then
+			loadFailed[player] = nil
+			return true
+		end
+		warn("[PlayerDataService] save failed (attempt " .. attempt .. "): " .. tostring(err))
+		if not force then
+			break
+		end
+		task.wait(1)
+	end
+	return false
+end
+
+--=====================================================================
+-- Mutation API (the only way gameplay code touches a profile)
+--=====================================================================
+
+function PlayerDataService.get(player)
+	return profiles[player]
+end
+
+function PlayerDataService.addItem(player, resourceId, amount)
+	local profile = profiles[player]
+	if not profile or not validResourceName(resourceId) then
+		return 0
+	end
+	amount = math.clamp(math.floor(amount), 0, 9999)
+	profile.inventory[resourceId] = (profile.inventory[resourceId] or 0) + amount
+	return profile.inventory[resourceId]
+end
+
+function PlayerDataService.takeItem(player, resourceId, amount)
+	local profile = profiles[player]
+	if not profile or not validResourceName(resourceId) then
+		return false
+	end
+	amount = math.clamp(math.floor(amount), 0, 9999)
+	local held = profile.inventory[resourceId] or 0
+	if held &lt; amount then
+		return false
+	end
+	profile.inventory[resourceId] = held - amount
+	return true
+end
+
+function PlayerDataService.countItem(player, resourceId)
+	local profile = profiles[player]
+	if not profile then
+		return 0
+	end
+	return profile.inventory[resourceId] or 0
+end
+
+function PlayerDataService.markPlot(player, plotId, structureId)
+	local profile = profiles[player]
+	if profile then
+		profile.plots[plotId] = structureId
+	end
+end
+
+function PlayerDataService.isProvisional(player)
+	return loadFailed[player] == true
+end
+
+--=====================================================================
+-- Lifecycle
+--=====================================================================
+
+local onProfileReady -- callback set by Bootstrap (UI snapshot push)
+
+function PlayerDataService.setOnProfileReady(callback)
+	onProfileReady = callback
+end
+
+function PlayerDataService.setupPlayer(player)
+	local profile = loadProfile(player)
+	profiles[player] = profile
+
+	local leaderstats = Instance.new("Folder")
+	leaderstats.Name = "leaderstats"
+	leaderstats.Parent = player
+	local level = Instance.new("IntValue")
+	level.Name = "Level"
+	level.Value = profile.level
+	level.Parent = leaderstats
+
+	if onProfileReady then
+		task.spawn(onProfileReady, player, profile)
+	end
+end
+
+function PlayerDataService.updateLeaderstat(player)
+	local profile = profiles[player]
+	local leaderstats = player:FindFirstChild("leaderstats")
+	local level = leaderstats and leaderstats:FindFirstChild("Level")
+	if profile and level then
+		level.Value = profile.level
+	end
+end
+
+function PlayerDataService.startAutosave()
+	task.spawn(function()
+		while true do
+			task.wait(Config.AutosaveIntervalSeconds)
+			for _, player in ipairs(Players:GetPlayers()) do
+				saveProfile(player, false)
+			end
+		end
+	end)
+end
+
+Players.PlayerRemoving:Connect(function(player)
+	saveProfile(player, true)
+	profiles[player] = nil
+	loadFailed[player] = nil
+end)
+
+game:BindToClose(function()
+	if RunService:IsStudio() then
+		return
+	end
+	for _, player in ipairs(Players:GetPlayers()) do
+		saveProfile(player, true)
+	end
+end)
+
+PlayerDataService.freshProfile = freshProfile
+
+return PlayerDataService
+</ProtectedString>
+</Properties>
+</Item>
+<Item class="ModuleScript" referent="RBX22">
+<Properties>
+<string name="Name">ProgressionService</string>
+<ProtectedString name="Source">-- Path: ServerScriptService/BeastboundModules/ProgressionService
+-- XP + levels. Levels only gate unlocks; nothing is purchasable here.
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Shared = ReplicatedStorage:WaitForChild("BeastboundShared")
+local Config = require(Shared.Config)
+
+local ProgressionService = {}
+
+local PlayerDataService
+local RemotesService
+local SyncService
+
+function ProgressionService.init(deps)
+	PlayerDataService = deps.PlayerDataService
+	RemotesService = deps.RemotesService
+	SyncService = deps.SyncService
+end
+
+function ProgressionService.award(player, amount, reason)
+	local profile = PlayerDataService.get(player)
+	if not profile or amount &lt;= 0 then
+		return nil
+	end
+
+	profile.xp += math.floor(amount)
+	local leveled = false
+
+	while profile.level &lt; #Config.LevelXpThresholds do
+		local needed = Config.LevelXpThresholds[profile.level + 1]
+		if profile.xp &gt;= needed then
+			profile.level += 1
+			leveled = true
+			RemotesService.toast(player, "Level " .. profile.level, "The settlement grows stronger.", "reward")
+		else
+			break
+		end
+	end
+
+	PlayerDataService.updateLeaderstat(player)
+	if leveled then
+		SyncService.playerSync(player)
+	end
+	return profile.level
+end
+
+return ProgressionService
+</ProtectedString>
+</Properties>
+</Item>
+<Item class="ModuleScript" referent="RBX23">
+<Properties>
+<string name="Name">ProjectService</string>
+<ProtectedString name="Source">-- Path: ServerScriptService/BeastboundModules/ProjectService
+-- "Restore the Heartroot" — the shared community project. The server holds
+-- all progress; contributions are clamped to what the player actually has.
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local Shared = ReplicatedStorage:WaitForChild("BeastboundShared")
+local Config = require(Shared.Config)
+local AudioConfig = require(Shared.AudioConfig)
+
+local Kit = require(script.Parent.BuilderKit)
+
+local ProjectService = {}
+
+local PlayerDataService, RemotesService, QuestService, ProgressionService, CreatureService, JourneyService, SyncService
+
+local progress = 0
+local target = 0
+local completed = false
+local contributions = {} -- [userId] = glowseeds given
+local laurelPart
+
+function ProjectService.init(deps, worldHandle)
+	PlayerDataService = deps.PlayerDataService
+	RemotesService = deps.RemotesService
+	QuestService = deps.QuestService
+	ProgressionService = deps.ProgressionService
+	CreatureService = deps.CreatureService
+	JourneyService = deps.JourneyService
+	SyncService = deps.SyncService
+
+	target = Config.HeartrootGlowseedsNeeded
+	completed = false
+	ProjectService.heartroot = worldHandle.heartroot
+	ProjectService.updateOrbVisual()
+end
+
+function ProjectService.snapshot()
+	return {
+		id = "Heartroot",
+		name = "Restore the Heartroot",
+		progress = progress,
+		target = target,
+		completed = completed,
+	}
+end
+
+function ProjectService.updateOrbVisual()
+	local orb = ProjectService.heartroot.Orb
+	if not orb or not orb.Parent then
+		return
+	end
+	local ratio = target &gt; 0 and math.clamp(progress / target, 0, 1) or 0
+	local size = 4 + ratio * 5
+	TweenService:Create(orb, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Size = Vector3.new(size, size, size),
+		Color = Color3.fromRGB(120, 255, 190):Lerp(Color3.fromRGB(255, 220, 120), ratio),
+	}):Play()
+end
+
+function ProjectService.contribute(player)
+	if completed then
+		RemotesService.toast(player, "Already restored", "The Heartroot shines fully. Next project unlocks via the journey.", "info")
+		return
+	end
+	local held = PlayerDataService.countItem(player, "Glowseed")
+	local chunk = math.min(Config.ContributeChunk, held)
+	if chunk &lt;= 0 then
+		RemotesService.toast(player, "No Glowseeds", "Gather Glowseeds on the middle terraces, then return.", "warn")
+		return
+	end
+
+	if not PlayerDataService.takeItem(player, "Glowseed", chunk) then
+		return
+	end
+
+	progress += chunk
+	contributions[player.UserId] = (contributions[player.UserId] or 0) + chunk
+
+	local profile = PlayerDataService.get(player)
+	if profile then
+		profile.counts.contributed += chunk
+	end
+	ProgressionService.award(player, Config.XpRewards.Contribute)
+	QuestService.mark(player, "contribute")
+	CreatureService.addBond(Config.BondPerContribution * chunk)
+	ProjectService.updateOrbVisual()
+	SyncService.playerSync(player)
+	SyncService.worldBroadcast()
+
+	CreatureService.react("contribute", ProjectService.heartroot.Altar.Position)
+
+	if progress % 10 == 0 then
+		RemotesService.toastAll("Heartroot stirring", progress .. " / " .. target .. " Glowseed light gathered.", "info")
+	end
+
+	if progress &gt;= target and not completed then
+		ProjectService.complete()
+	end
+end
+
+function ProjectService.complete()
+	completed = true
+	local orb = ProjectService.heartroot.Orb
+	if orb and orb.Parent then
+		TweenService:Create(orb, TweenInfo.new(2, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {
+			Size = Vector3.new(11, 11, 11),
+			Color = Color3.fromRGB(255, 230, 140),
+		}):Play()
+	end
+	CreatureService.react("restored", orb and orb.Position)
+	JourneyService.addMomentum(Config.JourneyMomentumPerProject)
+
+	-- visible world change: a bloom ring grows around the settlement plateau
+	for index = 1, 10 do
+		local angle = math.rad(index * 36)
+		local bloom = Kit.glow({
+			parent = ProjectService.heartroot.Model,
+			name = "RestoredBloom" .. index,
+			shape = Enum.PartType.Ball,
+			size = Vector3.new(2, 2, 2),
+			cframe = CFrame.new(math.cos(angle) * 18, 60.6, -14 + math.sin(angle) * 18),
+			color = Color3.fromRGB(255, 220, 120),
+			canCollide = false,
+		})
+		bloom.Transparency = 1
+		TweenService:Create(bloom, TweenInfo.new(1.2 + index * 0.1), { Transparency = 0.1 }):Play()
+	end
+
+	-- reward everyone who contributed
+	for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+		ProgressionService.award(player, Config.XpRewards.ProjectCompleteBonus)
+	end
+	RemotesService.toastAll("HEARTROOT RESTORED", "Aruun answers. A bloom spreads across the terrace.", "project")
+	Kit.playSoundAt(orb and orb.Position or Vector3.new(0, 66, -14), AudioConfig.ProjectComplete)
+	SyncService.worldBroadcast()
+end
+
+return ProjectService
+</ProtectedString>
+</Properties>
+</Item>
+<Item class="ModuleScript" referent="RBX24">
+<Properties>
+<string name="Name">QuestService</string>
+<ProtectedString name="Source">-- Path: ServerScriptService/BeastboundModules/QuestService
+-- Sequential objective chain per player. One active objective at a time;
+-- tags map gameplay events to progress. Cheap and perfectly broadcastable.
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Shared = ReplicatedStorage:WaitForChild("BeastboundShared")
+local QuestConfig = require(Shared.QuestConfig)
+
+local QuestService = {}
+
+local PlayerDataService, RemotesService, ProgressionService, SyncService
+
+function QuestService.init(deps)
+	PlayerDataService = deps.PlayerDataService
+	RemotesService = deps.RemotesService
+	ProgressionService = deps.ProgressionService
+	SyncService = deps.SyncService
+end
+
+--=====================================================================
+
+local function activeQuest(profile)
+	if not profile then
+		return nil
+	end
+	return QuestConfig.Quests[profile.quests.index]
+end
+
+function QuestService.mark(player, tag)
+	local profile = PlayerDataService.get(player)
+	if not profile then
+		return
+	end
+	local quest = activeQuest(profile)
+	if not quest or quest.Tag ~= tag then
+		return
+	end
+
+	profile.quests.progress += 1
+	if profile.quests.progress &gt;= quest.Target then
+		profile.quests.index += 1
+		profile.quests.progress = 0
+		ProgressionService.award(player, quest.RewardXp)
+		RemotesService.toast(player, "Objective complete", quest.Title .. "  (+" .. quest.RewardXp .. " XP)", "quest")
+	else
+		RemotesService.toast(player, quest.Title, profile.quests.progress .. " / " .. quest.Target, "quest")
+	end
+	SyncService.playerSync(player)
+end
+
+function QuestService.broadcastServerEvent(tag, excludes)
+	for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+		if not (excludes and excludes[player]) then
+			QuestService.mark(player, tag)
+		end
+	end
+end
+
+return QuestService
+</ProtectedString>
+</Properties>
+</Item>
+<Item class="ModuleScript" referent="RBX25">
+<Properties>
+<string name="Name">RemotesService</string>
+<ProtectedString name="Source">-- Path: ServerScriptService/BeastboundModules/RemotesService
+-- Creates remotes at startup and provides the only sanctioned push paths
+-- (personal snapshots, world snapshots, toasts). All client-&gt;server traffic
+-- belongs to specific gameplay services.
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Shared = ReplicatedStorage:WaitForChild("BeastboundShared")
+local Net = require(Shared.Net)
+
+local RemotesService = {}
+
+local NAMES = { "PlayerSync", "WorldSync", "Toast", "BuildRequest" }
+
+function RemotesService.init()
+	for _, name in ipairs(NAMES) do
+		Net.get(name)
+	end
+end
+
+function RemotesService.remote(name)
+	return Net.get(name)
+end
+
+function RemotesService.playerSync(player, snapshot)
+	Net.get("PlayerSync"):FireClient(player, snapshot)
+end
+
+function RemotesService.worldBroadcast(snapshot)
+	Net.get("WorldSync"):FireAllClients(snapshot)
+end
+
+function RemotesService.toast(player, title, message, kind)
+	Net.get("Toast"):FireClient(player, {
+		title = title,
+		message = message,
+		kind = kind or "info",
+	})
+end
+
+function RemotesService.toastAll(title, message, kind)
+	Net.get("Toast"):FireAllClients({
+		title = title,
+		message = message,
+		kind = kind or "info",
+	})
+end
+
+return RemotesService
+</ProtectedString>
+</Properties>
+</Item>
+<Item class="ModuleScript" referent="RBX26">
+<Properties>
+<string name="Name">StructureBuilder</string>
+<ProtectedString name="Source">-- Path: ServerScriptService/BeastboundModules/StructureBuilder
+-- Builds models for each structure in BuildingConfig.
+-- Add a new building by adding a config entry PLUS a builder function here.
+
+local ServerScriptService = game:GetService("ServerScriptService")
+local TweenService = game:GetService("TweenService")
+local Kit = require(ServerScriptService.BeastboundModules.BuilderKit)
+
+local WOOD = Color3.fromRGB(122, 88, 58)
+local WOOD_DARK = Color3.fromRGB(96, 68, 45)
+local LEAF = Color3.fromRGB(96, 156, 74)
+local STONE = Color3.fromRGB(140, 142, 148)
+local GLOW = Color3.fromRGB(120, 255, 190)
+
+local StructureBuilder = {}
+
+-- Sits exactly on top of the 1-stud-thick plot pad.
+local function canvas(base: CFrame)
+	return base * CFrame.new(0, 0.5, 0)
+end
+
+local builders = {}
+
+builders.Shelter = function(model, base)
+	local c = canvas(base)
+	Kit.part({ parent = model, name = "Floor", size = Vector3.new(16, 1, 16), cframe = c, color = WOOD_DARK, material = Enum.Material.WoodPlanks })
+	Kit.part({ parent = model, name = "WallBack", size = Vector3.new(16, 9, 1.4), cframe = c * CFrame.new(0, 5, -7.3), color = WOOD, material = Enum.Material.WoodPlanks })
+	Kit.part({ parent = model, name = "WallLeft", size = Vector3.new(1.4, 9, 14.6), cframe = c * CFrame.new(-7.3, 5, 0), color = WOOD, material = Enum.Material.WoodPlanks })
+	Kit.part({ parent = model, name = "WallRight", size = Vector3.new(1.4, 9, 14.6), cframe = c * CFrame.new(7.3, 5, 0), color = WOOD, material = Enum.Material.WoodPlanks })
+	Kit.part({ parent = model, name = "FrontL", size = Vector3.new(5, 9, 1.4), cframe = c * CFrame.new(-5.5, 5, 7.3), color = WOOD, material = Enum.Material.WoodPlanks })
+	Kit.part({ parent = model, name = "FrontR", size = Vector3.new(5, 9, 1.4), cframe = c * CFrame.new(5.5, 5, 7.3), color = WOOD, material = Enum.Material.WoodPlanks })
+	Kit.part({ parent = model, name = "FrontTop", size = Vector3.new(6, 3.4, 1.4), cframe = c * CFrame.new(0, 7.8, 7.3), color = WOOD, material = Enum.Material.WoodPlanks })
+	Kit.wedge({ parent = model, name = "RoofL", size = Vector3.new(10.4, 5, 19), cframe = c * CFrame.new(-4.6, 12, 0) * CFrame.Angles(0, 0, math.rad(-34)), color = LEAF, material = Enum.Material.Grass })
+	Kit.wedge({ parent = model, name = "RoofR", size = Vector3.new(10.4, 5, 19), cframe = c * CFrame.new(4.6, 12, 0) * CFrame.Angles(0, 0, math.rad(34)), color = LEAF, material = Enum.Material.Grass })
+	local window = Kit.glow({ parent = model, name = "Window", size = Vector3.new(2, 2, 0.4), cframe = c * CFrame.new(-6.9, 6, 3.5), color = Color3.fromRGB(255, 190, 110) })
+	Kit.pointLight(window, Color3.fromRGB(255, 190, 110), 0.8, 18)
+	return c * CFrame.new(0, 9.5, 0)
+end
+
+builders.LookoutTower = function(model, base)
+	local c = canvas(base)
+	for _, corner in ipairs({ Vector3.new(-3, 0, -3), Vector3.new(3, 0, -3), Vector3.new(-3, 0, 3), Vector3.new(3, 0, 3) }) do
+		Kit.part({ parent = model, name = "Leg", size = Vector3.new(1.6, 18, 1.6), cframe = c * CFrame.new(corner.X, 9, corner.Z), color = WOOD, material = Enum.Material.WoodPlanks })
+	end
+	Kit.part({ parent = model, name = "Deck", size = Vector3.new(11, 1.2, 11), cframe = c * CFrame.new(0, 18.5, 0), color = WOOD_DARK, material = Enum.Material.WoodPlanks })
+	Kit.part({ parent = model, name = "RailA", size = Vector3.new(11, 1, 0.8), cframe = c * CFrame.new(0, 20.4, 5.1), color = WOOD, material = Enum.Material.WoodPlanks })
+	Kit.part({ parent = model, name = "RailB", size = Vector3.new(11, 1, 0.8), cframe = c * CFrame.new(0, 20.4, -5.1), color = WOOD, material = Enum.Material.WoodPlanks })
+	Kit.part({ parent = model, name = "RailC", size = Vector3.new(0.8, 1, 11), cframe = c * CFrame.new(-5.1, 20.4, 0), color = WOOD, material = Enum.Material.WoodPlanks })
+	Kit.part({ parent = model, name = "RailD", size = Vector3.new(0.8, 1, 11), cframe = c * CFrame.new(5.1, 20.4, 0), color = WOOD, material = Enum.Material.WoodPlanks })
+	for i = 1, 9 do
+		Kit.part({
+			parent = model,
+			name = "Step",
+			size = Vector3.new(5, 0.6, 2.2),
+			cframe = c * CFrame.new(8.6, 1 + i * 2, -8.5 + i * 2.1),
+			color = WOOD_DARK,
+			material = Enum.Material.WoodPlanks,
+		})
+	end
+	local lamp = Kit.glow({ parent = model, name = "Lantern", shape = Enum.PartType.Ball, size = Vector3.new(3, 3, 3), cframe = c * CFrame.new(0, 22.5, 0), color = GLOW })
+	Kit.sparkle(lamp, GLOW, 1.5, 2, 1.4)
+	Kit.pointLight(lamp, GLOW, 1.4, 40)
+	return c * CFrame.new(0, 20, 0)
+end
+
+builders.ResonanceBeacon = function(model, base)
+	local c = canvas(base)
+	Kit.pillar({ parent = model, name = "Base", size = Vector3.new(4, 10, 10), cframe = c * CFrame.new(0, 2, 0), color = STONE, material = Enum.Material.Slate })
+	Kit.pillar({ parent = model, name = "Column", size = Vector3.new(7, 2.2, 2.2), cframe = c * CFrame.new(0, 7, 0), color = STONE, material = Enum.Material.Slate })
+	local crystal = Kit.glow({ parent = model, name = "Crystal", shape = Enum.PartType.Ball, size = Vector3.new(5, 5, 5), cframe = c * CFrame.new(0, 12, 0), color = GLOW })
+	Kit.sparkle(crystal, GLOW, 4, 3, 1.8)
+	Kit.pointLight(crystal, GLOW, 2, 55)
+
+	local ring = Kit.glow({ parent = model, name = "Ring", size = Vector3.new(0.4, 8.5, 8.5), cframe = c * CFrame.new(0, 12, 0), color = GLOW, canCollide = false })
+	ring.Shape = Enum.PartType.Cylinder
+	ring.CFrame = c * CFrame.new(0, 12, 0) * CFrame.Angles(0, 0, math.rad(90))
+
+	-- slow looping spin of the halo ring
+	task.spawn(function()
+		local spinCount = 0
+		while ring.Parent do
+			spinCount += 1
+			local to = c * CFrame.new(0, 12, 0)
+				* CFrame.Angles(0, 0, math.rad(90))
+				* CFrame.Angles(math.rad(90 * spinCount), 0, 0)
+			TweenService:Create(ring, TweenInfo.new(4, Enum.EasingStyle.Linear), { CFrame = to }):Play()
+			task.wait(4)
+		end
+	end)
+	return c * CFrame.new(0, 12, 0)
+end
+
+function StructureBuilder.build(structureId, baseCFrame, rotationStep)
+	local builder = builders[structureId]
+	assert(builder, "No StructureBuilder for " .. tostring(structureId))
+
+	local model = Instance.new("Model")
+	model.Name = structureId .. "_Structure"
+
+	local orientedBase = baseCFrame * CFrame.Angles(0, math.rad(rotationStep * 90), 0)
+	builder(model, orientedBase)
+
+	model.PrimaryPart = model:FindFirstChild("Floor") or model:FindFirstChild("Base") or model:FindFirstChild("Deck")
+	model:SetAttribute("StructureId", structureId)
+
+	for _, inst in ipairs(model:GetDescendants()) do
+		if inst:IsA("BasePart") then
+			inst.Anchored = true
+			inst.Transparency = 1
+		end
+	end
+	model:PivotTo(orientedBase * CFrame.new(0, -6, 0))
+
+	return model
+end
+
+function StructureBuilder.fadeIn(model, duration)
+	local info = TweenInfo.new(duration or 1.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local parts = {}
+	for _, inst in ipairs(model:GetDescendants()) do
+		if inst:IsA("BasePart") then
+			table.insert(parts, inst)
+		end
+	end
+	model:PivotTo(model:GetPivot() * CFrame.new(0, 6, 0))
+	for _, part in ipairs(parts) do
+		TweenService:Create(part, info, { Transparency = 0 }):Play()
+	end
+end
+
+return StructureBuilder
+</ProtectedString>
+</Properties>
+</Item>
+<Item class="ModuleScript" referent="RBX27">
+<Properties>
+<string name="Name">SyncService</string>
+<ProtectedString name="Source">-- Path: ServerScriptService/BeastboundModules/SyncService
+-- Assembles and pushes the two snapshot types the HUD renders:
+--   PlayerSync: personal (level, xp, inventory, quests, atlas)
+--   WorldSync:  shared (journey, project, creature bond)
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Shared = ReplicatedStorage:WaitForChild("BeastboundShared")
+local Config = require(Shared.Config)
+local QuestConfig = require(Shared.QuestConfig)
+
+local SyncService = {}
+
+local PlayerDataService, RemotesService, JourneyService, ProjectService, CreatureService, BuildingService
+
+function SyncService.init(deps)
+	PlayerDataService = deps.PlayerDataService
+	RemotesService = deps.RemotesService
+	JourneyService = deps.JourneyService
+	ProjectService = deps.ProjectService
+	CreatureService = deps.CreatureService
+	BuildingService = deps.BuildingService
+end
+
+function SyncService.playerSnapshot(player)
+	local profile = PlayerDataService.get(player)
+	if not profile then
+		return nil
+	end
+
+	local quest = QuestConfig.Quests[profile.quests.index]
+	local xpFloor = Config.LevelXpThresholds[profile.level] or 0
+	local xpCeiling = Config.LevelXpThresholds[profile.level + 1]
+
+	return {
+		level = profile.level,
+		xp = profile.xp,
+		xpFloor = xpFloor,
+		xpCeiling = xpCeiling,
+		inventory = profile.inventory,
+		counts = profile.counts,
+		discoveredLandmarks = profile.discoveredLandmarks,
+		plots = profile.plots,
+		provisional = PlayerDataService.isProvisional(player),
+		quest = quest and {
+			title = quest.Title,
+			hint = quest.Hint,
+			progress = profile.quests.progress,
+			target = quest.Target,
+		} or { title = QuestConfig.IdleTitle, hint = "", progress = 1, target = 1 },
+		catalogue = BuildingService.buildCatalogueFor(player),
+	}
+end
+
+function SyncService.worldSnapshot()
+	return {
+		journey = JourneyService.snapshot(),
+		project = ProjectService.snapshot(),
+		bond = CreatureService.bondSnapshot(),
+	}
+end
+
+function SyncService.playerSync(player)
+	local snapshot = SyncService.playerSnapshot(player)
+	if snapshot then
+		RemotesService.playerSync(player, snapshot)
+	end
+end
+
+function SyncService.worldBroadcast()
+	RemotesService.worldBroadcast(SyncService.worldSnapshot())
+end
+
+return SyncService
+</ProtectedString>
+</Properties>
+</Item>
+<Item class="ModuleScript" referent="RBX28">
+<Properties>
+<string name="Name">WorldBuilder</string>
+<ProtectedString name="Source">-- Path: ServerScriptService/BeastboundModules/WorldBuilder
+-- Generates the entire vertical-slice world from code:
+--   * Aruun, the giant Wayfarer (terraced back + animated neck/head/tail rig)
+--   * Mosslight Meadow dressing (forest, rocks, waterfall, glow flora)
+--   * The Dawnward settlement (spawn plaza, Heartroot, 6 build plots)
+--   * Gather nodes and landmark props
+-- All geometry is anchored; creature life comes from Motor6D.Transform only.
+
+local Kit = require(script.Parent.BuilderKit)
+local BiomeConfig = require(game:GetService("ReplicatedStorage").BeastboundShared.BiomeConfig)
+
+local WorldBuilder = {}
+
+local SKIN = Color3.fromRGB(70, 104, 118)
+local SKIN_DARK = Color3.fromRGB(52, 80, 92)
+local PAL = BiomeConfig.Stages[1].Palette
+local rand = Random.new(7)
+
+local world = {
+	tintGroups = { FoliageTint = {}, GroundTint = {}, AccentTint = {} },
+	plots = {},          -- plotId -&gt; pad part
+	landmarkProps = {},  -- landmarkId -&gt; model
+	refs = {},           -- rig references for CreatureService
+}
+
+local function tint(part, group)
+	table.insert(world.tintGroups[group], part)
+	return part
+end
+
+--=====================================================================
+-- Creature body
+--=====================================================================
+
+local function terrace(parent, surfaceHeight, radius, thickness, index)
+	local disc = Kit.pillar({
+		parent = parent,
+		name = "Terrace" .. index,
+		size = Vector3.new(thickness, radius * 2, radius * 2),
+		cframe = CFrame.new(0, surfaceHeight - thickness / 2, 0),
+		color = PAL.GroundTint,
+		material = Enum.Material.LeafyGrass,
+	})
+	tint(disc, "GroundTint")
+
+	for _ = 1, 6 do
+		local angle = rand:NextNumber(0, math.pi * 2)
+		local radiusOffset = rand:NextNumber(4, 14)
+		Kit.sphere({
+			parent = parent,
+			name = "TerraceBoulder",
+			size = Vector3.new(10, 8, 10),
+			cframe = CFrame.new(math.cos(angle) * (radius - radiusOffset), surfaceHeight + 2, math.sin(angle) * (radius - radiusOffset)),
+			color = Color3.fromRGB(120, 122, 118),
+			material = Enum.Material.Slate,
+		})
+	end
+	return disc
+end
+
+local function buildBody(body)
+	local specs = {
+		{ surfaceHeight = 30, radius = 115, thickness = 14 },
+		{ surfaceHeight = 40, radius = 95, thickness = 12 },
+		{ surfaceHeight = 50, radius = 75, thickness = 12 },
+		{ surfaceHeight = 60, radius = 55, thickness = 12 },
+	}
+	for index, spec in ipairs(specs) do
+		terrace(body, spec.surfaceHeight, spec.radius, spec.thickness, index)
+	end
+
+	local sails = {
+		{ z = -55, h = 18 }, { z = -70, h = 13 }, { z = -84, h = 9 }, { z = -97, h = 6 },
+	}
+	for index, spec in ipairs(sails) do
+		Kit.wedge({
+			parent = body,
+			name = "DorsalSail" .. index,
+			size = Vector3.new(10, spec.h, 7),
+			cframe = CFrame.new(0, 30 + spec.h / 2, spec.z),
+			color = SKIN_DARK,
+			material = Enum.Material.Slate,
+		})
+	end
+
+	Kit.sphere({
+		parent = body,
+		name = "Belly",
+		size = Vector3.new(230, 230, 260),
+		cframe = CFrame.new(0, -42, 10),
+		color = SKIN_DARK,
+		material = Enum.Material.Slate,
+	})
+
+	for _, offset in ipairs({ Vector3.new(-62, 12, -55), Vector3.new(62, 12, -55) }) do
+		Kit.sphere({
+			parent = body,
+			name = "Haunch",
+			size = Vector3.new(95, 80, 100),
+			cframe = CFrame.new(offset),
+			color = SKIN,
+			material = Enum.Material.Slate,
+		})
+	end
+
+	for _ = 1, 14 do
+		local angle = rand:NextNumber(0, math.pi * 2)
+		local radius = 96 + rand:NextNumber(-6, 6)
+		Kit.glow({
+			parent = body,
+			name = "Biolume",
+			size = Vector3.new(10, 1.4, 3),
+			cframe = CFrame.new(math.cos(angle) * radius, 17, math.sin(angle) * radius) * CFrame.Angles(0, -angle, 0),
+			color = PAL.AccentTint,
+			canCollide = false,
+		})
+	end
+end
+
+local function motorize(rootPart, drivenPart, jointName)
+	local motor = Instance.new("Motor6D")
+	motor.Name = jointName
+	motor.Part0 = rootPart
+	motor.Part1 = drivenPart
+	motor.Parent = rootPart
+	return motor
+end
+
+local function rigPart(props)
+	local part = Kit.part(props)
+	part.Anchored = false
+	part.Massless = true
+	part.CanCollide = false
+	return part
+end
+
+local function weldChain(parts)
+	for index = 2, #parts do
+		local weld = Instance.new("WeldConstraint")
+		weld.Part0 = parts[index - 1]
+		weld.Part1 = parts[index]
+		weld.Parent = parts[index]
+	end
+end
+
+local function buildNeck(model, refs)
+	local root = Kit.part({
+		parent = model,
+		name = "NeckRoot",
+		size = Vector3.new(10, 8, 10),
+		cframe = CFrame.new(0, 29, 106),
+		color = SKIN,
+		material = Enum.Material.Slate,
+	})
+
+	local neckA = rigPart({ parent = model, name = "NeckA", shape = Enum.PartType.Ball, size = Vector3.new(30, 30, 30), cframe = CFrame.new(0, 34, 122), color = SKIN, material = Enum.Material.Slate })
+	local neckB = rigPart({ parent = model, name = "NeckB", shape = Enum.PartType.Ball, size = Vector3.new(26, 26, 26), cframe = CFrame.new(0, 46, 138), color = SKIN, material = Enum.Material.Slate })
+	local neckC = rigPart({ parent = model, name = "NeckC", shape = Enum.PartType.Ball, size = Vector3.new(22, 22, 22), cframe = CFrame.new(0, 58, 150), color = SKIN, material = Enum.Material.Slate })
+	local head = rigPart({ parent = model, name = "Head", size = Vector3.new(26, 22, 38), cframe = CFrame.new(0, 72, 160) * CFrame.Angles(math.rad(18), 0, 0), color = SKIN, material = Enum.Material.Slate })
+	local brow = rigPart({ parent = model, name = "Brow", size = Vector3.new(28, 6, 12), cframe = CFrame.new(0, 80, 166) * CFrame.Angles(math.rad(18), 0, 0), color = SKIN_DARK, material = Enum.Material.Slate })
+	local jaw = rigPart({ parent = model, name = "Jaw", size = Vector3.new(20, 8, 28), cframe = CFrame.new(0, 64, 166), color = SKIN_DARK, material = Enum.Material.Slate })
+
+	local lantern = rigPart({ parent = model, name = "Lantern", shape = Enum.PartType.Ball, size = Vector3.new(7, 7, 7), cframe = CFrame.new(0, 84, 170), color = PAL.AccentTint, material = Enum.Material.Neon })
+	Kit.pointLight(lantern, PAL.AccentTint, 3, 130)
+	Kit.sparkle(lantern, PAL.AccentTint, 2, 4, 2.5)
+
+	local hornChains = {}
+	for _, side in ipairs({ -1, 1 }) do
+		local horns = {}
+		local defs = {
+			{ Vector3.new(10 * side, 82, 156), 6 },
+			{ Vector3.new(14 * side, 90, 150), 4.5 },
+			{ Vector3.new(16 * side, 97, 143), 3 },
+		}
+		for _, def in ipairs(defs) do
+			table.insert(horns, rigPart({ parent = model, name = "Horn", shape = Enum.PartType.Ball, size = Vector3.new(def[2] * 2, def[2] * 2, def[2] * 2), cframe = CFrame.new(def[1]), color = SKIN_DARK, material = Enum.Material.Slate }))
+		end
+		table.insert(hornChains, { head, horns[1], horns[2], horns[3] })
+	end
+
+	weldChain({ neckA, neckB, neckC, head, brow, jaw, lantern })
+	for _, chain in ipairs(hornChains) do
+		weldChain(chain)
+	end
+
+	refs.NeckJoint = motorize(root, neckA, "NeckJoint")
+	refs.head = head
+	refs.lantern = lantern
+end
+
+local function buildTail(model, refs)
+	local root = Kit.part({
+		parent = model,
+		name = "TailRoot",
+		size = Vector3.new(10, 8, 10),
+		cframe = CFrame.new(0, 29, -110),
+		color = SKIN,
+		material = Enum.Material.Slate,
+	})
+
+	local tailA = rigPart({ parent = model, name = "TailA", shape = Enum.PartType.Ball, size = Vector3.new(30, 30, 30), cframe = CFrame.new(0, 36, -132), color = SKIN, material = Enum.Material.Slate })
+	local tailB = rigPart({ parent = model, name = "TailB", shape = Enum.PartType.Ball, size = Vector3.new(24, 24, 24), cframe = CFrame.new(0, 46, -152), color = SKIN, material = Enum.Material.Slate })
+	local tailC = rigPart({ parent = model, name = "TailC", shape = Enum.PartType.Ball, size = Vector3.new(18, 18, 18), cframe = CFrame.new(0, 56, -168), color = SKIN, material = Enum.Material.Slate })
+	local fin = rigPart({ parent = model, name = "Fin", size = Vector3.new(2, 26, 14), cframe = CFrame.new(0, 68, -174) * CFrame.Angles(math.rad(-14), 0, 0), color = SKIN_DARK, material = Enum.Material.Slate })
+
+	weldChain({ tailA, tailB, tailC, fin })
+	refs.TailJoint = motorize(root, tailA, "TailJoint")
+end
+
+--=====================================================================
+-- Landmarks
+--=====================================================================
+
+local function buildLandmarks(model)
+	local hollow = Instance.new("Model")
+	hollow.Name = "WhisperingHollow"
+	hollow.Parent = model
+	Kit.part({ parent = hollow, name = "PillarL", size = Vector3.new(4, 14, 4), cframe = CFrame.new(-92, 47, -44), color = Color3.fromRGB(110, 112, 116), material = Enum.Material.Rock })
+	Kit.part({ parent = hollow, name = "PillarR", size = Vector3.new(4, 14, 4), cframe = CFrame.new(-84, 47, -36), color = Color3.fromRGB(110, 112, 116), material = Enum.Material.Rock })
+	Kit.part({ parent = hollow, name = "Arch", size = Vector3.new(13, 3, 5), cframe = CFrame.new(-88, 54, -40) * CFrame.Angles(0, math.rad(45), 0), color = Color3.fromRGB(110, 112, 116), material = Enum.Material.Rock })
+	local hum = Kit.glow({ parent = hollow, name = "Hum", size = Vector3.new(2, 2, 2), cframe = CFrame.new(-88, 42, -40), color = PAL.AccentTint, canCollide = false })
+	Kit.sparkle(hum, PAL.AccentTint, 3, 1, 3)
+	tint(hum, "AccentTint")
+	world.landmarkProps.WhisperingHollow = hollow
+
+	local sentinel = Instance.new("Model")
+	sentinel.Name = "SentinelStone"
+	sentinel.Parent = model
+	Kit.part({ parent = sentinel, name = "Bust", size = Vector3.new(8, 12, 8), cframe = CFrame.new(62, 36, 86), color = Color3.fromRGB(128, 130, 124), material = Enum.Material.Rock })
+	Kit.part({ parent = sentinel, name = "Head", size = Vector3.new(6, 6, 6), cframe = CFrame.new(62, 45, 86), color = Color3.fromRGB(128, 130, 124), material = Enum.Material.Rock })
+	Kit.part({ parent = sentinel, name = "Brow", size = Vector3.new(7, 1.6, 3), cframe = CFrame.new(62, 47, 88), color = Color3.fromRGB(104, 106, 100), material = Enum.Material.Rock })
+	tint(Kit.part({ parent = sentinel, name = "Moss", size = Vector3.new(8.4, 1.2, 8.4), cframe = CFrame.new(62, 42.6, 86), color = PAL.FoliageTint, material = Enum.Material.Moss, canCollide = false }), "FoliageTint")
+	world.landmarkProps.SentinelStone = sentinel
+
+	local garden = Instance.new("Model")
+	garden.Name = "HiddenGarden"
+	garden.Parent = model
+	for index, offset in ipairs({ Vector3.new(-4, 0, -6), Vector3.new(4, 0, 6), Vector3.new(-7, 0, 4), Vector3.new(5, 0, -6) }) do
+		local bloom = Kit.glow({
+			parent = garden,
+			name = "Bloom" .. index,
+			shape = Enum.PartType.Ball,
+			size = Vector3.new(2.4, 2.4, 2.4),
+			cframe = CFrame.new(106, 32.5, 10) + offset,
+			color = PAL.AccentTint,
+			canCollide = false,
+		})
+		tint(bloom, "AccentTint")
+	end
+	Kit.part({ parent = garden, name = "Stone", size = Vector3.new(6, 3, 6), cframe = CFrame.new(106, 31.5, 10), color = Color3.fromRGB(120, 122, 118), material = Enum.Material.Rock })
+	world.landmarkProps.HiddenGarden = garden
+
+	local crest = Instance.new("Model")
+	crest.Name = "LanternCrest"
+	crest.Parent = model
+	Kit.part({ parent = crest, name = "Balcony", size = Vector3.new(16, 1, 14), cframe = CFrame.new(26, 44.5, 148), color = Color3.fromRGB(120, 122, 118), material = Enum.Material.Rock })
+	local crestGlow = Kit.glow({ parent = crest, name = "CrestGlow", size = Vector3.new(1.4, 4, 1.4), cframe = CFrame.new(26, 47, 152), color = PAL.AccentTint, canCollide = false })
+	tint(crestGlow, "AccentTint")
+	world.landmarkProps.LanternCrest = crest
+	-- (Tail Spire landmark prop = SpirePlatform + pin, built in buildPaths)
+end
+
+--=====================================================================
+-- Gather nodes
+--=====================================================================
+
+local function makeNode(parent, resourceId, position)
+	local node = Instance.new("Model")
+	node.Name = "Node_" .. resourceId
+	node:SetAttribute("ResourceId", resourceId)
+	node:SetAttribute("Available", true)
+
+	if resourceId == "Driftwood" then
+		for index, offset in ipairs({ Vector3.new(0, 1, 0), Vector3.new(2, 1, 1.4), Vector3.new(-1.6, 1, 1.8), Vector3.new(0.8, 2.6, 1) }) do
+			Kit.part({
+				parent = node,
+				name = "Log" .. index,
+				size = Vector3.new(4.6, 1.6, 1.8),
+				cframe = CFrame.new(position + offset) * CFrame.Angles(0, rand:NextNumber(0, math.pi), rand:NextNumber(-0.2, 0.2)),
+				color = Color3.fromRGB(122, 88, 58),
+				material = Enum.Material.WoodPlanks,
+			})
+		end
+	elseif resourceId == "Stone" then
+		for index, offset in ipairs({ Vector3.new(0, 2, 0), Vector3.new(2.6, 1.4, 1.4), Vector3.new(-2.2, 1.2, 1.8), Vector3.new(1, 3.4, 0.6) }) do
+			Kit.sphere({
+				parent = node,
+				name = "Rock" .. index,
+				size = Vector3.new(4, 3.4, 4),
+				cframe = CFrame.new(position + offset),
+				color = Color3.fromRGB(140, 142, 148),
+				material = Enum.Material.Slate,
+			})
+		end
+	else -- Glowseed
+		Kit.part({ parent = node, name = "StalkRoot", size = Vector3.new(2.6, 3, 2.6), cframe = CFrame.new(position + Vector3.new(0, 1.5, 0)), color = Color3.fromRGB(84, 122, 84), material = Enum.Material.Grass })
+		for index = 1, 3 do
+			local seed = Kit.glow({
+				parent = node,
+				name = "Seed" .. index,
+				shape = Enum.PartType.Ball,
+				size = Vector3.new(1.8, 1.8, 1.8),
+				cframe = CFrame.new(position + Vector3.new(math.cos(index * 2.1) * 1.6, 4 + index * 0.25, math.sin(index * 2.1) * 1.6)),
+				color = Color3.fromRGB(120, 255, 190),
+				canCollide = false,
+			})
+			tint(seed, "AccentTint")
+			Kit.sparkle(seed, Color3.fromRGB(120, 255, 190), 0.6, 1, 2)
+		end
+	end
+
+	node.PrimaryPart = node:FindFirstChildWhichIsA("BasePart")
+	world.nodes[#world.nodes + 1] = node
+	node.Parent = parent
+end
+
+local function buildNodes(nodesFolder)
+	-- Glowseed clusters: L3 meadow shelf (y50, radius 75)
+	for _, position in ipairs({
+		Vector3.new(55, 50, -45), Vector3.new(-60, 50, 25), Vector3.new(-20, 50, -60), Vector3.new(65, 50, 30), Vector3.new(25, 50, -62),
+	}) do
+		makeNode(nodesFolder, "Glowseed", position)
+	end
+	-- Driftwood: forest belt L2 (y40, radius 95)
+	for _, position in ipairs({
+		Vector3.new(60, 40, 55), Vector3.new(-55, 40, -20), Vector3.new(15, 40, 75), Vector3.new(-35, 40, 60), Vector3.new(80, 40, -35),
+	}) do
+		makeNode(nodesFolder, "Driftwood", position)
+	end
+	-- Stone: outer rim L1 (y30, radius 115)
+	for _, position in ipairs({
+		Vector3.new(95, 30, -40), Vector3.new(-95, 30, 20), Vector3.new(70, 30, -85), Vector3.new(-70, 30, 90), Vector3.new(100, 30, 45),
+	}) do
+		makeNode(nodesFolder, "Stone", position)
+	end
+end
+
+--=====================================================================
+-- Settlement
+--=====================================================================
+
+local function buildSettlement(creature, plotsFolder)
+	local top = 60
+
+	local spawnLocation = Instance.new("SpawnLocation")
+	spawnLocation.Name = "DawnwardSpawn"
+	spawnLocation.Size = Vector3.new(14, 1, 14)
+	spawnLocation.CFrame = CFrame.new(0, top + 0.5, 14)
+	spawnLocation.Color = Color3.fromRGB(150, 140, 120)
+	spawnLocation.Material = Enum.Material.WoodPlanks
+	spawnLocation.Anchored = true
+	spawnLocation.Neutral = true
+	spawnLocation.Duration = 0
+	spawnLocation.CanQuery = false
+	spawnLocation.Parent = creature
+
+	-- campfire
+	local fire = Instance.new("Model")
+	fire.Name = "Campfire"
+	fire.Parent = creature
+	Kit.pillar({ parent = fire, name = "Pit", size = Vector3.new(1.2, 9, 9), cframe = CFrame.new(9, top + 0.6, 9), color = Color3.fromRGB(120, 122, 118), material = Enum.Material.Slate })
+	for index = 1, 4 do
+		local angle = math.rad(index * 90)
+		Kit.part({
+			parent = fire,
+			name = "Log",
+			size = Vector3.new(3.4, 1, 1),
+			cframe = CFrame.new(9, top + 1.6, 9) * CFrame.Angles(0, angle, 0) * CFrame.new(1.4, 0, 0),
+			color = Color3.fromRGB(122, 88, 58),
+			material = Enum.Material.WoodPlanks,
+		})
+	end
+	local flame = Kit.glow({ parent = fire, name = "Flame", shape = Enum.PartType.Ball, size = Vector3.new(2.6, 3.4, 2.6), cframe = CFrame.new(9, top + 2.6, 9), color = Color3.fromRGB(255, 170, 70), canCollide = false })
+	Kit.pointLight(flame, Color3.fromRGB(255, 170, 70), 2, 30)
+	Kit.sparkle(flame, Color3.fromRGB(255, 190, 90), 8, 3, 1.1)
+
+	-- migration signpost (client binds the label to live journey state)
+	local signpost = Instance.new("Model")
+	signpost.Name = "MigrationSignpost"
+	signpost.Parent = creature
+	Kit.part({ parent = signpost, name = "Post", size = Vector3.new(1.2, 9, 1.2), cframe = CFrame.new(-8, top + 4.5, 12), color = Color3.fromRGB(101, 74, 50), material = Enum.Material.WoodPlanks })
+	local board = Kit.part({ parent = signpost, name = "Board", size = Vector3.new(10, 4, 0.6), cframe = CFrame.new(-8, top + 8, 12) * CFrame.Angles(0, math.rad(18), 0), color = Color3.fromRGB(122, 88, 58), material = Enum.Material.WoodPlanks })
+	board:SetAttribute("SignBoard", true)
+	local gui = Instance.new("BillboardGui")
+	gui.Name = "SignGui"
+	gui.Size = UDim2.fromScale(8, 3)
+	gui.StudsOffset = Vector3.new(0, 1.5, 0)
+	gui.AlwaysOnTop = false
+	gui.MaxDistance = 120
+	gui.Parent = board
+	local label = Instance.new("TextLabel")
+	label.Name = "SignText"
+	label.Size = UDim2.fromScale(1, 1)
+	label.BackgroundTransparency = 1
+	label.Font = Enum.Font.GothamBold
+	label.TextScaled = true
+	label.TextColor3 = Color3.fromRGB(255, 240, 200)
+	label.TextStrokeTransparency = 0.5
+	label.Text = "Mosslight Meadow"
+	label.Parent = gui
+	world.refs.signLabel = label
+
+	-- build plots
+	for plotIndex = 1, 6 do
+		local angle = math.rad((plotIndex - 1) * 60 + 30)
+		local plotId = "Plot" .. plotIndex
+		local pad = Kit.part({
+			parent = plotsFolder,
+			name = plotId,
+			size = Vector3.new(16, 1, 16),
+			cframe = CFrame.new(math.cos(angle) * 40, top + 0.5, math.sin(angle) * 40),
+			color = Color3.fromRGB(150, 152, 158),
+			material = Enum.Material.Slate,
+			canCollide = true,
+		})
+		pad:SetAttribute("PlotId", plotId)
+		pad:SetAttribute("OwnerUserId", 0)
+		pad:SetAttribute("StructureId", "")
+		world.plots[plotId] = pad
+
+		local ring = Kit.glow({
+			parent = plotsFolder,
+			name = plotId .. "_Mark",
+			size = Vector3.new(0.4, 17, 17),
+			cframe = CFrame.new(math.cos(angle) * 40, top + 1.2, math.sin(angle) * 40) * CFrame.Angles(math.rad(90), 0, 0),
+			color = PAL.AccentTint,
+			canCollide = false,
+			transparency = 0.5,
+		})
+		tint(ring, "AccentTint")
+	end
+
+	-- Heartroot (ProjectService drives the orb)
+	local heartroot = Instance.new("Model")
+	heartroot.Name = "Heartroot"
+	heartroot.Parent = creature
+	Kit.pillar({ parent = heartroot, name = "Pedestal", size = Vector3.new(3, 16, 16), cframe = CFrame.new(0, top + 1.5, -14), color = Color3.fromRGB(120, 122, 118), material = Enum.Material.Slate })
+	for index = 1, 5 do
+		local angle = math.rad(index * 72)
+		Kit.glow({
+			parent = heartroot,
+			name = "RootVein" .. index,
+			size = Vector3.new(0.4, 0.4, 8),
+			cframe = CFrame.new(0, top + 2.4, -14) * CFrame.Angles(0, angle, 0) * CFrame.new(0, 0, -9),
+			color = PAL.AccentTint,
+			canCollide = false,
+			transparency = 0.4,
+		})
+	end
+	local orb = Kit.glow({
+		parent = heartroot,
+		name = "HeartOrb",
+		shape = Enum.PartType.Ball,
+		size = Vector3.new(4, 4, 4),
+		cframe = CFrame.new(0, top + 6, -14),
+		color = PAL.AccentTint,
+		canCollide = false,
+	})
+	Kit.pointLight(orb, PAL.AccentTint, 2, 45)
+
+	local altar = Kit.part({
+		parent = heartroot,
+		name = "Altar",
+		size = Vector3.new(10, 0.8, 10),
+		cframe = CFrame.new(0, top + 3.6, -14),
+		color = Color3.fromRGB(120, 122, 118),
+		material = Enum.Material.Slate,
+		canCollide = true,
+	})
+	altar:SetAttribute("ContributionAltar", true)
+
+	world.heartroot = { Model = heartroot, Orb = orb, Altar = altar }
+end
+
+--=====================================================================
+-- Paths (so every terrace is climbable)
+--=====================================================================
+
+local function buildPaths(model)
+	local pathColor = Color3.fromRGB(140, 132, 118)
+	for _, def in ipairs({
+		-- L1 (y30) -&gt; L2 (y40), southwest
+		{ a = Vector3.new(-45, 30, 70), b = Vector3.new(-75, 40, 40) },
+		-- L2 -&gt; L3 (northeast)
+		{ a = Vector3.new(55, 40, -30), b = Vector3.new(28, 50, -2) },
+		-- L3 -&gt; L4 settlement plateau (center)
+		{ a = Vector3.new(-25, 50, 30), b = Vector3.new(-2, 60, 5) },
+		-- lantern crest ramp from L1
+		{ a = Vector3.new(26, 30, 104), b = Vector3.new(26, 44, 140) },
+	}) do
+		Kit.ramp({ parent = model, a = def.a, b = def.b, width = 9, color = pathColor, material = Enum.Material.Rock, name = "PathRamp" })
+	end
+
+	-- tail spire walkway (two switchbacks against the tail)
+	Kit.ramp({ parent = model, a = Vector3.new(12, 30, -108), b = Vector3.new(16, 44, -132), width = 7, color = pathColor, material = Enum.Material.Rock, name = "SpireWalkA" })
+	Kit.ramp({ parent = model, a = Vector3.new(16, 44, -132), b = Vector3.new(18, 58, -156), width = 7, color = pathColor, material = Enum.Material.Rock, name = "SpireWalkB" })
+	Kit.part({ parent = model, name = "SpirePlatform", size = Vector3.new(16, 1, 14), cframe = CFrame.new(18, 59.5, -166), color = pathColor, material = Enum.Material.Rock })
+	local spireGlow = Kit.glow({ parent = model, name = "SpireTip", shape = Enum.PartType.Ball, size = Vector3.new(3, 3, 3), cframe = CFrame.new(18, 63, -166), color = PAL.AccentTint, canCollide = false })
+	tint(spireGlow, "AccentTint")
+	world.landmarkProps.TailSpire = model:FindFirstChild("SpirePlatform")
+end
+
+--=====================================================================
+-- Waterfall + pond (hidden garden side)
+--=====================================================================
+
+local function buildWaterfall(model)
+	Kit.part({
+		parent = model,
+		name = "WaterfallSheet",
+		size = Vector3.new(10, 12, 1),
+		cframe = CFrame.new(100, 35, 10) * CFrame.Angles(0, 0, math.rad(12)),
+		color = Color3.fromRGB(160, 210, 230),
+		material = Enum.Material.Glass,
+		transparency = 0.45,
+		canCollide = false,
+	})
+	local pond = Kit.pillar({
+		parent = model,
+		name = "Pond",
+		size = Vector3.new(1.2, 22, 16),
+		cframe = CFrame.new(106, 30.7, 10),
+		color = Color3.fromRGB(120, 180, 200),
+		material = Enum.Material.Glass,
+		transparency = 0.35,
+		canCollide = false,
+	})
+	local splash = Kit.part({
+		parent = model,
+		name = "SplashAnchor",
+		size = Vector3.new(1, 1, 1),
+		cframe = CFrame.new(100, 30.5, 10),
+		color = Color3.fromRGB(120, 180, 200),
+		transparency = 1,
+		canCollide = false,
+	})
+	Kit.sparkle(splash, Color3.fromRGB(200, 230, 245), 14, 5, 0.8)
+	tint(pond, "AccentTint")
+end
+
+--=====================================================================
+-- Flora &amp; horizon (with migration "movement" illusions)
+--=====================================================================
+
+local function buildFlora(model)
+	-- forest belt on L2 + L3
+	local treePositions = {
+		Vector3.new(-60, 40, 55), Vector3.new(30, 40, 70), Vector3.new(-30, 40, 60), Vector3.new(60, 40, 40),
+		Vector3.new(-15, 40, 65), Vector3.new(-72, 40, -8), Vector3.new(45, 40, 62), Vector3.new(-48, 40, 22),
+		Vector3.new(38, 50, 8), Vector3.new(-40, 50, -48), Vector3.new(-62, 50, -10), Vector3.new(10, 50, -68),
+	}
+	for index, position in ipairs(treePositions) do
+		local scale = 0.8 + (index % 3) * 0.25
+		local trunk = Kit.part({
+			parent = model,
+			name = "Trunk" .. index,
+			size = Vector3.new(2.6 * scale, 11 * scale, 2.6 * scale),
+			cframe = CFrame.new(position + Vector3.new(0, 5.5 * scale, 0)),
+			color = Color3.fromRGB(101, 74, 50),
+			material = Enum.Material.WoodPlanks,
+		})
+		tint(trunk, "GroundTint")
+		local canopy = Kit.sphere({
+			parent = model,
+			name = "Canopy" .. index,
+			size = Vector3.new(11 * scale, 12 * scale, 11 * scale),
+			cframe = CFrame.new(position + Vector3.new(0, 13 * scale, 0)),
+			color = PAL.FoliageTint,
+			material = Enum.Material.Grass,
+		})
+		tint(canopy, "FoliageTint")
+	end
+
+	-- scattered rocks on L1
+	for _, position in ipairs({
+		Vector3.new(85, 30, 80), Vector3.new(-85, 30, -70), Vector3.new(30, 30, -95), Vector3.new(-100, 30, 55),
+	}) do
+		Kit.sphere({
+			parent = model,
+			name = "Boulder",
+			size = Vector3.new(9, 7, 9),
+			cframe = CFrame.new(position),
+			color = Color3.fromRGB(120, 122, 118),
+			material = Enum.Material.Slate,
+		})
+	end
+
+	-- glow flowers on the settlement plateau
+	for _, position in ipairs({
+		Vector3.new(-20, 60, 22), Vector3.new(18, 60, 26), Vector3.new(-24, 60, -2), Vector3.new(24, 60, 6),
+	}) do
+		local bloom = Kit.glow({
+			parent = model,
+			name = "PlazaBloom",
+			shape = Enum.PartType.Ball,
+			size = Vector3.new(1.6, 1.6, 1.6),
+			cframe = CFrame.new(position + Vector3.new(0, 0.9, 0)),
+			color = PAL.AccentTint,
+			canCollide = false,
+		})
+		tint(bloom, "AccentTint")
+	end
+end
+
+local function buildHorizon(model)
+	-- distant scenery ring (recolored per journey stage)
+	for index = 1, 14 do
+		local angle = math.rad(index * (360 / 14) + rand:NextNumber(-6, 6))
+		local distance = rand:NextNumber(420, 640)
+		local height = rand:NextNumber(-60, 10)
+		local thickness = rand:NextNumber(20, 55)
+		local monolith = Kit.part({
+			parent = model,
+			name = "Horizon" .. index,
+			size = Vector3.new(thickness, rand:NextNumber(90, 190), thickness * 0.7),
+			cframe = CFrame.new(math.cos(angle) * distance, height, math.sin(angle) * distance) * CFrame.Angles(0, angle, rand:NextNumber(-0.08, 0.08)),
+			color = Color3.fromRGB(120, 122, 118),
+			material = Enum.Material.Rock,
+		})
+		tint(monolith, "GroundTint")
+	end
+
+	-- passing cloud banks: slow bobbing spheres reinforce that Aruun travels
+	for index = 1, 8 do
+		local angle = math.rad(index * 45)
+		local cloud = Kit.sphere({
+			parent = model,
+			name = "CloudBank" .. index,
+			size = Vector3.new(150, 60, 120),
+			cframe = CFrame.new(math.cos(angle) * 320, -20 - rand:NextNumber(0, 20), math.sin(angle) * 320),
+			color = Color3.fromRGB(235, 240, 245),
+			material = Enum.Material.Neon,
+			transparency = 0.86,
+			castShadow = false,
+		})
+		task.spawn(function()
+			local baseY = cloud.Position.Y
+			while cloud.Parent do
+				local tween = game:GetService("TweenService"):Create(
+					cloud,
+					TweenInfo.new(rand:NextNumber(9, 16), Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+					{ Position = cloud.Position + Vector3.new(0, 9, 0) }
+				)
+				tween:Play()
+				task.wait(10)
+				tween:Cancel()
+				cloud.Position = Vector3.new(cloud.Position.X, baseY, cloud.Position.Z)
+			end
+		end)
+	end
+
+	-- drift streaks: particles streaming past the head read as forward motion
+	local drift = Kit.part({
+		parent = model,
+		name = "DriftAnchor",
+		size = Vector3.new(1, 1, 1),
+		cframe = CFrame.new(0, 130, -140),
+		color = Color3.fromRGB(255, 255, 255),
+		transparency = 1,
+		canCollide = false,
+	})
+	local streaks = Instance.new("ParticleEmitter")
+	streaks.Color = ColorSequence.new(Color3.fromRGB(220, 235, 245))
+	streaks.Rate = 5
+	streaks.Lifetime = NumberRange.new(6, 9)
+	streaks.Speed = NumberRange.new(55, 75)
+	streaks.EmissionDirection = Enum.NormalId.Front -- -Z: scenery races behind us
+	streaks.Size = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 9),
+		NumberSequenceKeypoint.new(1, 12),
+	})
+	streaks.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 1),
+		NumberSequenceKeypoint.new(0.3, 0.94),
+		NumberSequenceKeypoint.new(1, 1),
+	})
+	streaks.LockedToPart = false
+	streaks.Parent = drift
+end
+
+--=====================================================================
+-- Entry point
+--=====================================================================
+
+function WorldBuilder.build()
+	local creature = Instance.new("Model")
+	creature.Name = "Aruun"
+	creature.Parent = workspace
+
+	local bodyFolder = Instance.new("Folder")
+	bodyFolder.Name = "Environment"
+	bodyFolder.Parent = creature
+	local rigFolder = Instance.new("Folder")
+	rigFolder.Name = "Rig"
+	rigFolder.Parent = creature
+	local nodesFolder = Instance.new("Folder")
+	nodesFolder.Name = "GatherNodes"
+	nodesFolder.Parent = creature
+	local plotsFolder = Instance.new("Folder")
+	plotsFolder.Name = "BuildPlots"
+	plotsFolder.Parent = creature
+
+	buildBody(rigFolder)
+	buildNeck(rigFolder, world.refs)
+	buildTail(rigFolder, world.refs)
+	buildPaths(bodyFolder)
+	buildLandmarks(bodyFolder)
+	buildWaterfall(bodyFolder)
+	buildFlora(bodyFolder)
+	buildHorizon(bodyFolder)
+	buildSettlement(creature, plotsFolder)
+	buildNodes(nodesFolder)
+
+	world.creature = creature
+
+	-- soft idle heartbeat parallax on the horizon handled by JourneyService
+	return world
+end
+
+return WorldBuilder
+</ProtectedString>
+</Properties>
+</Item>
+</Item>
+</Item>
+<Item class="StarterPlayer" referent="RBX29">
+<Properties>
+<string name="Name">StarterPlayer</string>
+</Properties>
+<Item class="StarterPlayerScripts" referent="RBX30">
+<Properties>
+<string name="Name">StarterPlayerScripts</string>
+</Properties>
+<Item class="LocalScript" referent="RBX31">
+<Properties>
+<string name="Name">BuildingController</string>
+<ProtectedString name="Source">-- Path: StarterPlayer/StarterPlayerScripts/BuildingController (LocalScript)
+-- Build menu, ghost preview over plot pads, rotation, confirm/cancel.
+-- The client never sets costs or validity — it only submits intentions.
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Shared = ReplicatedStorage:WaitForChild("BeastboundShared")
+local Net = require(Shared.Net)
+local BuildingConfig = require(Shared.BuildingConfig)
+
+local player = Players.LocalPlayer
+local buildRemote = Net.get("BuildRequest")
+
+local state = {
+	open = false,
+	placing = nil,
+	rotationStep = 0,
+	targetPad = nil,
+	inventory = {},
+	catalogue = {},
+}
+
+local PAD_FOLDER = workspace:WaitForChild("Aruun"):WaitForChild("BuildPlots")
+
+--=====================================================================
+-- UI construction (pure code, mobile friendly)
+--=====================================================================
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "BeastboundBuild"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local function card(parent, size, position, corner)
+	local frame = Instance.new("Frame")
+	frame.Size = size
+	frame.Position = position
+	frame.BackgroundColor3 = Color3.fromRGB(18, 26, 24)
+	frame.BackgroundTransparency = 0.12
+	frame.BorderSizePixel = 0
+	frame.Parent = parent
+	local uiCorner = Instance.new("UICorner")
+	uiCorner.CornerRadius = UDim.new(0, corner or 14)
+	uiCorner.Parent = frame
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = Color3.fromRGB(120, 255, 190)
+	stroke.Transparency = 0.7
+	stroke.Parent = frame
+	return frame
+end
+
+local toggle = Instance.new("TextButton")
+toggle.Size = UDim2.fromOffset(150, 52)
+toggle.Position = UDim2.new(1, -170, 1, -76)
+toggle.Font = Enum.Font.GothamBold
+toggle.TextSize = 22
+toggle.Text = "BUILD"
+toggle.TextColor3 = Color3.fromRGB(20, 30, 25)
+toggle.BackgroundColor3 = Color3.fromRGB(120, 255, 190)
+toggle.Parent = gui
+Instance.new("UICorner").Parent = toggle
+
+local panel = card(gui, UDim2.fromOffset(330, 420), UDim2.new(1, -354, 1, -540), 16)
+panel.Visible = false
+do
+	local layout = Instance.new("UIListLayout")
+	layout.Padding = UDim.new(0, 8)
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+	layout.Parent = panel
+	local padding = Instance.new("UIPadding")
+	padding.PaddingTop = UDim.new(0, 12)
+	padding.PaddingLeft = UDim.new(0, 12)
+	padding.PaddingRight = UDim.new(0, 12)
+	padding.Parent = panel
+end
+
+local panelTitle = Instance.new("TextLabel")
+panelTitle.Size = UDim2.new(1, 0, 0, 28)
+panelTitle.BackgroundTransparency = 1
+panelTitle.Font = Enum.Font.GothamBold
+panelTitle.TextSize = 20
+panelTitle.TextXAlignment = Enum.TextXAlignment.Left
+panelTitle.LayoutOrder = 0
+panelTitle.Text = "Constructions"
+panelTitle.TextColor3 = Color3.fromRGB(230, 245, 235)
+panelTitle.Parent = panel
+
+local rows = {}
+
+for index, id in ipairs(BuildingConfig.Order) do
+	local def = BuildingConfig.ById[id]
+	local row = card(panel, UDim2.new(1, 0, 0, 88), UDim2.new(0, 0, 0, 0), 10)
+	row.LayoutOrder = index
+
+	local nameLabel = Instance.new("TextLabel")
+	nameLabel.Size = UDim2.new(1, -16, 0, 22)
+	nameLabel.Position = UDim.new(0, 8, 0, 4)
+	nameLabel.BackgroundTransparency = 1
+	nameLabel.Font = Enum.Font.GothamBold
+	nameLabel.TextSize = 18
+	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+	nameLabel.Text = def.DisplayName
+	nameLabel.TextColor3 = Color3.fromRGB(230, 245, 235)
+	nameLabel.Parent = row
+
+	local descLabel = Instance.new("TextLabel")
+	descLabel.Size = UDim2.new(1, -16, 0, 32)
+	descLabel.Position = UDim.new(0, 8, 0, 26)
+	descLabel.BackgroundTransparency = 1
+	descLabel.Font = Enum.Font.Gotham
+	descLabel.TextSize = 13
+	descLabel.TextWrapped = true
+	descLabel.TextXAlignment = Enum.TextXAlignment.Left
+	descLabel.TextColor3 = Color3.fromRGB(170, 195, 180)
+	descLabel.Text = def.Description
+	descLabel.Parent = row
+
+	local costLabel = Instance.new("TextLabel")
+	costLabel.Size = UDim2.new(1, -16, 0, 20)
+	costLabel.Position = UDim.new(0, 8, 1, -26)
+	costLabel.BackgroundTransparency = 1
+	costLabel.Font = Enum.Font.GothamMedium
+	costLabel.TextSize = 14
+	costLabel.TextXAlignment = Enum.TextXAlignment.Left
+	costLabel.TextColor3 = Color3.fromRGB(120, 255, 190)
+	costLabel.Parent = row
+
+	row.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			state.placing = id
+			state.rotationStep = 0
+			panel.Visible = false
+			bar.Visible = true
+			barLabel.Text = "Walk to a glowing plot pad, then Confirm."
+		end
+	end)
+	rows[id] = { row = row, cost = costLabel }
+end
+
+-- placement bar
+local bar = card(gui, UDim2.fromOffset(470, 64), UDim2.new(0.5, -235, 1, -180), 16)
+bar.Visible = false
+local barLabel = Instance.new("TextLabel")
+barLabel.Size = UDim2.new(1, -260, 1, -12)
+barLabel.Position = UDim.new(0, 12, 0, 6)
+barLabel.BackgroundTransparency = 1
+barLabel.Font = Enum.Font.GothamBold
+barLabel.TextSize = 15
+barLabel.TextXAlignment = Enum.TextXAlignment.Left
+barLabel.TextColor3 = Color3.fromRGB(230, 245, 235)
+barLabel.Parent = bar
+
+local rotateButton = Instance.new("TextButton")
+rotateButton.Size = UDim2.fromOffset(110, 44)
+rotateButton.Position = UDim2.new(1, -238, 0.5, -22)
+rotateButton.Font = Enum.Font.GothamBold
+rotateButton.TextSize = 18
+rotateButton.Text = "Rotate"
+rotateButton.TextColor3 = Color3.fromRGB(20, 30, 25)
+rotateButton.BackgroundColor3 = Color3.fromRGB(120, 255, 190)
+rotateButton.Parent = bar
+Instance.new("UICorner").Parent = rotateButton
+
+local confirmButton = Instance.new("TextButton")
+confirmButton.Size = UDim2.fromOffset(110, 44)
+confirmButton.Position = UDim2.new(1, -120, 0.5, -22)
+confirmButton.Font = Enum.Font.GothamBold
+confirmButton.TextSize = 18
+confirmButton.Text = "Confirm"
+confirmButton.TextColor3 = Color3.fromRGB(20, 30, 25)
+confirmButton.BackgroundColor3 = Color3.fromRGB(255, 220, 120)
+confirmButton.Parent = bar
+Instance.new("UICorner").Parent = confirmButton
+
+local ghost = Instance.new("Part")
+ghost.Name = "BuildGhost"
+ghost.Size = Vector3.new(16, 12, 16)
+ghost.Transparency = 1
+ghost.Color = Color3.fromRGB(120, 255, 190)
+ghost.Material = Enum.Material.ForceField
+ghost.Anchored = true
+ghost.CanCollide = false
+ghost.CanQuery = false
+ghost.Parent = workspace
+
+--=====================================================================
+-- Behavior
+--=====================================================================
+
+local function costText(def)
+	local parts = {}
+	for resourceId, amount in pairs(def.Cost or {}) do
+		table.insert(parts, amount .. " " .. resourceId)
+	end
+	table.sort(parts)
+	return table.concat(parts, "   ")
+end
+
+local function refreshCatalogue()
+	for _, entry in ipairs(state.catalogue) do
+		local row = rows[entry.id]
+		if row then
+			row.cost.Text = (entry.unlocked and "" or ("Locked — Level " .. entry.unlockLevel .. " — ")) .. costText(entry)
+			row.cost.TextColor3 = entry.unlocked and Color3.fromRGB(120, 255, 190) or Color3.fromRGB(220, 170, 110)
+		end
+	end
+end
+
+toggle.Activated:Connect(function()
+	state.open = not state.open
+	panel.Visible = state.open
+end)
+
+rotateButton.Activated:Connect(function()
+	state.rotationStep = (state.rotationStep + 1) % 4
+	ghost.CFrame = ghost.CFrame * CFrame.Angles(0, math.rad(90), 0)
+end)
+
+confirmButton.Activated:Connect(function()
+	if not state.placing then
+		return
+	end
+	if not state.targetPad then
+		barLabel.Text = "Stand near a glowing plot pad first."
+		return
+	end
+	buildRemote:FireServer(state.placing, state.targetPad.Name, state.rotationStep)
+	state.placing = nil
+	state.rotationStep = 0
+	state.targetPad = nil
+	bar.Visible = false
+	ghost.Transparency = 1
+end)
+
+RunService.RenderStepped:Connect(function()
+	if not state.placing then
+		return
+	end
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	if not root then
+		return
+	end
+
+	local best, bestDist = nil, 26
+	for _, pad in ipairs(PAD_FOLDER:GetChildren()) do
+		if pad:IsA("BasePart") and pad:GetAttribute("StructureId") == "" then
+			local dist = (pad.Position - root.Position).Magnitude
+			if dist &lt; bestDist then
+				best, bestDist = pad, dist
+			end
+		end
+	end
+
+	state.targetPad = best
+	if best then
+		ghost.Transparency = 0.7
+		ghost.CFrame = CFrame.new(best.Position + Vector3.new(0, 7, 0)) * CFrame.Angles(0, math.rad(state.rotationStep * 90), 0)
+	else
+		ghost.Transparency = 1
+	end
+end)
+
+Net.get("PlayerSync").OnClientEvent:Connect(function(snapshot)
+	if type(snapshot) ~= "table" then
+		return
+	end
+	state.inventory = snapshot.inventory or {}
+	state.catalogue = snapshot.catalogue or {}
+	refreshCatalogue()
+end)
+</ProtectedString>
+</Properties>
+</Item>
+<Item class="LocalScript" referent="RBX32">
+<Properties>
+<string name="Name">HUDController</string>
+<ProtectedString name="Source">-- Path: StarterPlayer/StarterPlayerScripts/HUDController (LocalScript)
+-- Main HUD + Wayfinder Atlas (discovery log). Everything is generated in code
+-- so the file can be pasted as a single LocalScript. Renders only snapshots
+-- received from the server; no client-side attempt is made to authorize state.
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Shared = ReplicatedStorage:WaitForChild("BeastboundShared")
+local Net = require(Shared.Net)
+local ResourceConfig = require(Shared.ResourceConfig)
+local BiomeConfig = require(Shared.BiomeConfig)
+local AudioConfig = require(Shared.AudioConfig)
+
+local player = Players.LocalPlayer
+
+local GLOW = Color3.fromRGB(120, 255, 190)
+local PAPER = Color3.fromRGB(230, 245, 235)
+local DARK = Color3.fromRGB(18, 26, 24)
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "BeastboundHUD"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local function clickSound()
+	local sound = Instance.new("Sound")
+	sound.SoundId = AudioConfig.UiClick.SoundId
+	sound.Volume = AudioConfig.UiClick.Volume
+	sound.PlaybackSpeed = AudioConfig.UiClick.Pitch
+	sound.Parent = gui
+	sound.Ended:Once(function()
+		sound:Destroy()
+	end)
+	sound:Play()
+end
+
+local function card(parent, size, position)
+	local frame = Instance.new("Frame")
+	frame.Size = size
+	frame.Position = position
+	frame.BackgroundColor3 = DARK
+	frame.BackgroundTransparency = 0.15
+	frame.BorderSizePixel = 0
+	frame.Parent = parent
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 14)
+	corner.Parent = frame
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = GLOW
+	stroke.Transparency = 0.75
+	stroke.Parent = frame
+	return frame
+end
+
+local function label(parent, size, position, text, size_font, align)
+	local textLabel = Instance.new("TextLabel")
+	textLabel.Size = size
+	textLabel.Position = position
+	textLabel.BackgroundTransparency = 1
+	textLabel.Font = Enum.Font.GothamBold
+	textLabel.TextSize = size_font or 16
+	textLabel.TextColor3 = PAPER
+	textLabel.TextXAlignment = align or Enum.TextXAlignment.Left
+	textLabel.Text = text or ""
+	textLabel.Parent = parent
+	return textLabel
+end
+
+local function bar(parent, position, size)
+	local background = Instance.new("Frame")
+	background.Size = size or UDim2.new(1, -16, 0, 8)
+	background.Position = position
+	background.BackgroundColor3 = Color3.fromRGB(10, 16, 14)
+	background.BorderSizePixel = 0
+	background.Parent = parent
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(1, 0)
+	corner.Parent = background
+	local fill = Instance.new("Frame")
+	fill.Size = UDim2.fromScale(0, 1)
+	fill.BackgroundColor3 = GLOW
+	fill.BorderSizePixel = 0
+	fill.Parent = background
+	local fillCorner = Instance.new("UICorner")
+	fillCorner.CornerRadius = UDim.new(1, 0)
+	fillCorner.Parent = fill
+	return fill
+end
+
+--=====================================================================
+-- Panels
+--=====================================================================
+
+-- level pill (top-left)
+local levelCard = card(gui, UDim2.fromOffset(200, 58), UDim2.fromOffset(14, 14))
+local levelText = label(levelCard, UDim2.new(1, -16, 0, 22), UDim.new(0, 8, 0, 6), "Wayfarer — Level 1", 17)
+local xpFill = bar(levelCard, UDim2.new(0, 8, 0, 36), UDim2.new(1, -16, 0, 8))
+
+-- objective + journey (top-center)
+local objectiveCard = card(gui, UDim2.fromOffset(460, 92), UDim2.new(0.5, -230, 0, 14))
+local objectiveText = label(objectiveCard, UDim2.new(1, -16, 0, 22), UDim.new(0, 8, 0, 6), "Waiting for the server…", 18)
+local objectiveHint = label(objectiveCard, UDim2.new(1, -16, 0, 18), UDim.new(0, 8, 0, 28), "", 12, Enum.TextXAlignment.Center)
+objectiveHint.TextColor3 = Color3.fromRGB(170, 195, 180)
+local objectiveFill = bar(objectiveCard, UDim2.new(0, 8, 0, 52), UDim2.new(1, -16, 0, 8))
+
+local journeyCard = card(gui, UDim2.fromOffset(460, 54), UDim2.new(0.5, -230, 0, 114))
+journeyCard.BackgroundColor3 = Color3.fromRGB(26, 34, 30)
+local journeyText = label(journeyCard, UDim2.new(1, -16, 0, 18), UDim.new(0, 8, 0, 5), "Migration: Mosslight Meadow", 15)
+local journeyFill = bar(journeyCard, UDim2.new(0, 8, 0, 32), UDim2.new(1, -16, 0, 7))
+journeyFill.BackgroundColor3 = Color3.fromRGB(255, 220, 120)
+
+-- resource chips (bottom-left)
+local chips = {}
+local chipRow = card(gui, UDim2.fromOffset(320, 52), UDim2.new(0, 14, 1, -66))
+for index, resourceId in ipairs(ResourceConfig.Order) do
+	local def = ResourceConfig.ById[resourceId]
+	local chip = Instance.new("Frame")
+	chip.Size = UDim2.new(0, 96, 1, -12)
+	chip.Position = UDim2.new(0, 4 + (index - 1) * 100, 0, 6)
+	chip.BackgroundColor3 = Color3.fromRGB(10, 16, 14)
+	chip.BackgroundTransparency = 0.4
+	chip.BorderSizePixel = 0
+	chip.Parent = chipRow
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 10)
+	corner.Parent = chip
+	local dot = Instance.new("Frame")
+	dot.Size = UDim2.fromOffset(10, 10)
+	dot.Position = UDim2.new(0, 8, 0, 8)
+	dot.BackgroundColor3 = def.IconColor
+	dot.BorderSizePixel = 0
+	dot.Parent = chip
+	local dotCorner = Instance.new("UICorner")
+	dotCorner.CornerRadius = UDim.new(1, 0)
+	dotCorner.Parent = dot
+	local countLabel = label(chip, UDim2.new(1, -10, 0, 18), UDim.new(0, 24, 0, 4), "0", 14)
+	local nameLabel = label(chip, UDim2.new(1, -10, 0, 14), UDim.new(0, 8, 1, -18), def.DisplayName, 10, Enum.TextXAlignment.Center)
+	nameLabel.TextColor3 = Color3.fromRGB(150, 175, 160)
+	chips[resourceId] = countLabel
+end
+
+-- creature status + community project (top-right)
+local bondCard = card(gui, UDim2.fromOffset(260, 58), UDim2.new(1, -274, 0, 14))
+local bondText = label(bondCard, UDim2.new(1, -16, 0, 18), UDim.new(0, 8, 0, 6), "Aruun: Distant (Bond 1)", 14)
+local bondFill = bar(bondCard, UDim2.new(0, 8, 0, 32), UDim2.new(1, -16, 0, 8))
+
+local projectCard = card(gui, UDim2.fromOffset(260, 58), UDim2.new(1, -274, 0, 80))
+local projectText = label(projectCard, UDim2.new(1, -16, 0, 18), UDim.new(0, 8, 0, 6), "Heartroot: 0 / 0", 14)
+local projectFill = bar(projectCard, UDim2.new(0, 8, 0, 32), UDim2.new(1, -16, 0, 8))
+projectFill.BackgroundColor3 = Color3.fromRGB(255, 220, 120)
+
+-- BOTTON: Atlas toggle
+local atlasToggle = Instance.new("TextButton")
+atlasToggle.Size = UDim2.fromOffset(150, 52)
+atlasToggle.Position = UDim2.new(1, -340, 1, -76)
+atlasToggle.Font = Enum.Font.GothamBold
+atlasToggle.TextSize = 22
+atlasToggle.Text = "ATLAS"
+atlasToggle.TextColor3 = Color3.fromRGB(20, 30, 25)
+atlasToggle.BackgroundColor3 = Color3.fromRGB(120, 255, 190)
+atlasToggle.Parent = gui
+Instance.new("UICorner").Parent = atlasToggle
+
+-- Atlas panel
+local atlasPanel = card(gui, UDim2.fromOffset(420, 470), UDim2.new(0.5, -210, 0.5, -235), 16)
+atlasPanel.Visible = false
+local atlasScroll = Instance.new("ScrollingFrame")
+atlasScroll.Size = UDim2.new(1, -16, 1, -76)
+atlasScroll.Position = UDim.new(0, 8, 0, 60)
+atlasScroll.BackgroundTransparency = 1
+atlasScroll.BorderSizePixel = 0
+atlasScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+atlasScroll.CanvasSize = UDim2.fromOffset(0, 0)
+atlasScroll.ScrollBarThickness = 4
+atlasScroll.Parent = atlasPanel
+local atlasLayout = Instance.new("UIListLayout")
+atlasLayout.Padding = UDim.new(0, 8)
+atlasLayout.Parent = atlasScroll
+label(atlasPanel, UDim2.new(1, -16, 0, 24), UDim.new(0, 8, 0, 10), "The Wayfinder Atlas", 20)
+local atlasSummary = label(atlasPanel, UDim2.new(1, -16, 0, 18), UDim.new(0, 8, 0, 36), "0 / 0 landmarks found", 13)
+atlasSummary.TextColor3 = Color3.fromRGB(170, 195, 180)
+
+local atlasRows = {}
+for _, landmark in ipairs(BiomeConfig.Landmarks) do
+	local row = Instance.new("Frame")
+	row.Size = UDim2.new(1, 0, 0, 52)
+	row.BackgroundColor3 = Color3.fromRGB(10, 16, 14)
+	row.BorderSizePixel = 0
+	row.Parent = atlasScroll
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 10)
+	corner.Parent = row
+	local nameText = label(row, UDim2.new(1, -48, 0, 20), UDim.new(0, 10, 0, 6), "???", 15)
+	local loreText = label(row, UDim2.new(1, -48, 0, 24), UDim.new(0, 10, 0, 26), "Undiscovered — explore the edges of Aruun.", 12)
+	loreText.TextColor3 = Color3.fromRGB(150, 175, 160)
+	loreText.TextWrapped = true
+	loreText.Font = Enum.Font.Gotham
+	local mark = label(row, UDim2.new(0, 28, 1, 0), UDim.new(1, -34, 0, 0), "", 22, Enum.TextXAlignment.Right)
+	atlasRows[landmark.Id] = {
+		name = nameText,
+		lore = loreText,
+		mark = mark,
+		config = landmark,
+	}
+end
+
+-- toast stack (right side)
+local toastFrame = Instance.new("Frame")
+toastFrame.Size = UDim2.fromOffset(320, 400)
+toastFrame.Position = UDim2.new(1, -344, 0.5, -80)
+toastFrame.BackgroundTransparency = 1
+toastFrame.Parent = gui
+local toastLayout = Instance.new("UIListLayout")
+toastLayout.Padding = UDim.new(0, 8)
+toastLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+toastLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+toastLayout.Parent = toastFrame
+
+local TOAST_COLORS = {
+	info = Color3.fromRGB(120, 255, 190),
+	quest = Color3.fromRGB(255, 220, 120),
+	reward = Color3.fromRGB(255, 220, 120),
+	discover = Color3.fromRGB(120, 200, 255),
+	build = Color3.fromRGB(120, 255, 190),
+	warn = Color3.fromRGB(255, 150, 130),
+	project = Color3.fromRGB(255, 220, 120),
+	journey = Color3.fromRGB(120, 200, 255),
+}
+
+local function toast(data)
+	if type(data) ~= "table" then
+		return
+	end
+	local card = Instance.new("Frame")
+	card.Size = UDim2.new(1, 0, 0, 64)
+	card.BackgroundColor3 = DARK
+	card.BackgroundTransparency = 0.1
+	card.BorderSizePixel = 0
+	card.Parent = toastFrame
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 12)
+	corner.Parent = card
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = TOAST_COLORS[data.kind] or GLOW
+	stroke.Transparency = 0.4
+	stroke.Parent = card
+	label(card, UDim2.new(1, -16, 0, 20), UDim.new(0, 8, 0, 6), tostring(data.title or ""), 15)
+	local message = label(card, UDim2.new(1, -16, 0, 30), UDim.new(0, 8, 0, 28), tostring(data.message or ""), 12)
+	message.Font = Enum.Font.Gotham
+	message.TextColor3 = Color3.fromRGB(190, 210, 195)
+	message.TextWrapped = true
+
+	task.delay(4.5, function()
+		card:Destroy()
+	end)
+end
+
+--=====================================================================
+-- Update logic (Renders only what the server authoritatively sends)
+--=====================================================================
+
+local function ratioOf(progress, target)
+	local safeTarget = tonumber(target) or 0
+	if safeTarget &lt;= 0 then
+		return 1
+	end
+	return math.clamp((tonumber(progress) or 0) / safeTarget, 0, 1)
+end
+
+Net.get("PlayerSync").OnClientEvent:Connect(function(snapshot)
+	if type(snapshot) ~= "table" then
+		return
+	end
+
+	levelText.Text = "Wayfarer — Level " .. tostring(snapshot.level)
+	local xpRange = snapshot.xpCeiling and (snapshot.xpCeiling - snapshot.xpFloor) or nil
+	xpFill.Size = UDim2.fromScale(ratioOf(snapshot.xp - snapshot.xpFloor, xpRange), 1)
+
+	for resourceId, countLabel in pairs(chips) do
+		countLabel.Text = tostring((snapshot.inventory or {})[resourceId] or 0)
+	end
+
+	local quest = snapshot.quest or {}
+	objectiveText.Text = quest.title or ""
+	objectiveHint.Text = quest.hint or ""
+	objectiveFill.Size = UDim2.fromScale(ratioOf(quest.progress, quest.target), 1)
+
+	if snapshot.provisional then
+		objectiveHint.Text = "Data save unavailable this session (Studio API access is off)."
+	end
+
+	for landmarkId, row in pairs(atlasRows) do
+		if (snapshot.discoveredLandmarks or {})[landmarkId] then
+			row.name.Text = row.config.Name
+			row.lore.Text = row.config.Lore
+			row.mark.Text = "✓"
+		else
+			row.name.Text = "???"
+			row.lore.Text = "Undiscovered — explore the edges of Aruun."
+			row.mark.Text = ""
+		end
+	end
+
+	local found = 0
+	for _, landmarkId in pairs(snapshot.discoveredLandmarks or {}) do
+		found += 1
+	end
+	atlasSummary.Text = found .. " / " .. #BiomeConfig.Landmarks .. " landmarks found"
+end)
+
+Net.get("WorldSync").OnClientEvent:Connect(function(snapshot)
+	if type(snapshot) ~= "table" then
+		return
+	end
+
+	local journey = snapshot.journey or {}
+	local journeyRatio = journey.finalStage and 1 or ratioOf(journey.momentum, journey.target)
+	journeyText.Text = "Migration · " .. tostring(journey.name) .. " — Stage " .. tostring(journey.stage)
+	journeyFill.Size = UDim2.fromScale(journeyRatio, 1)
+
+	local bond = snapshot.bond or {}
+	bondText.Text = "Aruun: " .. tostring(bond.name) .. " (Bond " .. tostring(bond.level) .. ")"
+	bondFill.Size = UDim2.fromScale(ratioOf(bond.points, bond.level * 30), 1)
+
+	local project = snapshot.project or {}
+	projectText.Text = tostring(project.name) .. ": " .. tostring(project.progress) .. " / " .. tostring(project.target)
+	if project.completed then
+		projectText.Text = tostring(project.name) .. " — restored!"
+	end
+	projectFill.Size = UDim2.fromScale(ratioOf(project.progress, project.target), 1)
+
+	-- bind the in-world signpost to live journey data
+	local creature = workspace:FindFirstChild("Aruun")
+	if creature then
+		local signpost = creature:FindFirstChild("MigrationSignpost")
+		local board = signpost and signpost:FindFirstChild("Board")
+		local signGui = board and board:FindFirstChild("SignGui")
+		local signText = signGui and signGui:FindFirstChild("SignText")
+		if signText then
+			signText.Text = tostring(journey.name)
+		end
+	end
+end)
+
+Net.get("Toast").OnClientEvent:Connect(toast)
+
+atlasToggle.Activated:Connect(function()
+	clickSound()
+	atlasPanel.Visible = not atlasPanel.Visible
+end)
+</ProtectedString>
+</Properties>
+</Item>
+<Item class="LocalScript" referent="RBX33">
+<Properties>
+<string name="Name">IntroController</string>
+<ProtectedString name="Source">-- Path: StarterPlayer/StarterPlayerScripts/IntroController (LocalScript)
+-- Minute 0 reveal: a short, skippable cinematic that frames Aruun and the
+-- settlement, then hands the camera back to the player.
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "BeastboundIntro"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.DisplayOrder = 50
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local backdrop = Instance.new("Frame")
+backdrop.Size = UDim2.fromScale(1, 1)
+backdrop.BackgroundColor3 = Color3.fromRGB(10, 16, 18)
+backdrop.BackgroundTransparency = 0.35
+backdrop.BorderSizePixel = 0
+backdrop.Parent = gui
+
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new(Color3.fromRGB(10, 16, 18), Color3.fromRGB(20, 40, 38))
+gradient.Rotation = 90
+gradient.Parent = backdrop
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.fromScale(1, 0.2)
+title.Position = UDim2.fromScale(0, 0.34)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
+title.Text = "BEASTBOUND"
+title.TextScaled = true
+title.TextColor3 = Color3.fromRGB(255, 240, 200)
+title.TextStrokeTransparency = 0.7
+title.Parent = backdrop
+
+local subtitle = Instance.new("TextLabel")
+subtitle.Size = UDim2.fromScale(1, 0.06)
+subtitle.Position = UDim2.fromScale(0, 0.54)
+subtitle.BackgroundTransparency = 1
+subtitle.Font = Enum.Font.GothamMedium
+subtitle.TextScaled = true
+subtitle.Text = "The Great Migration — you live on the back of a giant named Aruun"
+subtitle.TextColor3 = Color3.fromRGB(200, 230, 205)
+subtitle.Parent = backdrop
+
+local skip = Instance.new("TextButton")
+skip.Size = UDim2.fromScale(0.2, 0.07)
+skip.Position = UDim2.fromScale(0.4, 0.88)
+skip.Font = Enum.Font.GothamBold
+skip.TextScaled = true
+skip.Text = "Begin"
+skip.TextColor3 = Color3.fromRGB(20, 30, 25)
+skip.BackgroundColor3 = Color3.fromRGB(120, 255, 190)
+skip.Parent = gui
+Instance.new("UICorner").Parent = skip
+
+local started = false
+
+local function endIntro()
+	if started then
+		return
+	end
+	started = true
+	local fade = TweenService:Create(gui, TweenInfo.new(0.8), { Enabled = false })
+	camera.CameraType = Enum.CameraType.Custom
+	camera.CameraSubject = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+	fade:Play()
+	task.delay(1, function()
+		gui:Destroy()
+	end)
+end
+
+skip.Activated:Connect(endIntro)
+
+task.spawn(function()
+	if not workspace:FindFirstChild("Aruun") then
+		workspace:WaitForChild("Aruun", 10)
+	end
+	camera.CameraType = Enum.CameraType.Scriptable
+
+	camera.CFrame = CFrame.new(0, 40, 330) * CFrame.Angles(math.rad(6), 0, 0)
+	TweenService:Create(camera, TweenInfo.new(9, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+		CFrame = CFrame.new(0, 88, 210) * CFrame.Angles(0, 0, 0),
+	}):Play()
+
+	task.delay(9, endIntro)
+end)
+</ProtectedString>
+</Properties>
+</Item>
+</Item>
+</Item>
+</roblox>
