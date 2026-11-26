@@ -174,3 +174,17 @@ landmarks (Tail Spire, Hidden Garden, Lantern Crest — Atlas entries). Minutes
   denied server-side, no errors.
 - [ ] Mobile tap: gather prompts, build confirm, HUD readability on a phone layout.
 - [ ] Performance: ~6 clients, stable frame rate, creature animation smooth.
+
+## UNIT CLASH — Roblox edition (`unit-clash-roblox/`)
+
+A second, separate game: a server-authoritative Luau port of the UNIT CLASH battle
+sandbox (15 config-driven units, behavior-brain AI, abilities, auras, projectiles,
+devices, budgets, battle controls, results). See `unit-clash-roblox/README.md` and
+load it with `tools/load_uc_from_github.lua` in the Studio Command Bar. CI also
+builds `UnitClash.rbxlx` on every push.
+
+## UNIT CLASH — browser edition (`unit-clash/`)
+
+The original zero-dependency HTML5/Canvas version with the full Battle Lab
+(multi-run experiments, synergy scan, formation variants, history). See
+`unit-clash/README.md`. Note: this one runs in a browser, not Roblox.

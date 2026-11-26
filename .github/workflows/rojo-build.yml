@@ -1,16 +1,20 @@
-name: Build Roblox place file
+name: Build Roblox place files
 
 on:
   push:
     branches: [main]
     paths:
       - "src/**"
+      - "unit-clash-roblox/src/**"
       - "default.project.json"
+      - "unit-clash-roblox/default.project.json"
       - ".github/workflows/rojo-build.yml"
   pull_request:
     paths:
       - "src/**"
+      - "unit-clash-roblox/src/**"
       - "default.project.json"
+      - "unit-clash-roblox/default.project.json"
   workflow_dispatch:
 
 jobs:
@@ -23,11 +27,14 @@ jobs:
         with:
           version: "7.4.4"
 
-      - name: Build place file
+      - name: Build BEASTBOUND place file
         run: rojo build default.project.json -o build/Beastbound_TheGreatMigration.rbxlx
 
-      - name: Upload build artifact
+      - name: Build UNIT CLASH place file
+        run: rojo build unit-clash-roblox/default.project.json -o build/UnitClash.rbxlx
+
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Beastbound_TheGreatMigration
-          path: build/Beastbound_TheGreatMigration.rbxlx
+          name: Roblox-builds
+          path: build/*.rbxlx
