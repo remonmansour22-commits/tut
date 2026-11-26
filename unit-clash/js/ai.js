@@ -49,6 +49,35 @@ export function mostWoundedAlly(sim, u, r) {
   return best;
 }
 
+// Closest living enemy device (turret/totem) within r, or null.
+export function nearestEnemyDevice(sim, u, r) {
+  let best = null, bd = r;
+  for (const d of sim.devices) {
+    if (d.team === u.team || !d.alive || d.hp <= 0) continue;
+    const dd = dist(u, d);
+    if (dd < bd) { bd = dd; best = d; }
+  }
+  return best;
+}
+
+// Counterplay: turrets are priorities. Units in range shoot them without
+// repositioning; melee units will walk to one even past a nearby enemy.
+// Healing pads only draw fire when no unit target exists.
+export function devicePriority(sim, u) {
+  if (!u.def.attack || u.def.attack.damage <= 0) return;
+  const dev = nearestEnemyDevice(sim, u, u.def.attack.range + 30);
+  if (!dev) return;
+  const reach = u.def.attack.range + (dev.def.radius || 10);
+  const inRange = dist(u, dev) <= reach;
+  const melee = u.def.attack.type === 'melee';
+  if (dev.kind === 'turret' && (inRange || melee)) {
+    u.attackTarget = dev;
+    if (!inRange) u.moveTarget = { x: dev.x, y: dev.y };
+  } else if (dev.kind !== 'turret' && !u.attackTarget && inRange) {
+    u.attackTarget = dev;
+  }
+}
+
 export function enemyCentroid(sim, u) {
   let x = 0, y = 0, n = 0;
   for (const e of sim.units) {
@@ -328,6 +357,7 @@ export function think(sim, u) {
   const brain = BRAINS[u.def.brain] || BRAINS.brawler;
   brain(sim, u);
   focusFire(sim, u);
+  devicePriority(sim, u);
 }
 
 // Team coordination: part of the army converges on the squad's prime target

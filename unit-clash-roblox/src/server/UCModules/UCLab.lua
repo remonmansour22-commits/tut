@@ -126,7 +126,7 @@ function UCLab:runExperiment(configs, runs, onProgress)
 	local aggregated = {}
 	for _, item in ipairs(configs) do
 		local agg = { name = item.name, runs = 0, winsA = 0, winsB = 0, draws = 0,
-			duration = 0, survA = 0, survB = 0, dmgA = 0, dmgB = 0, healA = 0, healB = 0 }
+			duration = 0, survA = 0, survB = 0, dmgA = 0, dmgB = 0, healA = 0, healB = 0, devA = 0, devB = 0 }
 		for i = 1, runs do
 			local seed = UCRng.deterministicSeed(item.config.seed or 1000, i)
 			local r = UCLab.runner(item.config, seed)
@@ -149,6 +149,8 @@ function UCLab:runExperiment(configs, runs, onProgress)
 			agg.dmgB = agg.dmgB + res.B.damage
 			agg.healA = agg.healA + res.A.healing
 			agg.healB = agg.healB + res.B.healing
+			agg.devA = agg.devA + (res.A.deviceDamage or 0)
+			agg.devB = agg.devB + (res.B.deviceDamage or 0)
 			finished = finished + 1
 			if onProgress and finished % 2 == 0 then
 				onProgress(finished, total)
@@ -162,6 +164,8 @@ function UCLab:runExperiment(configs, runs, onProgress)
 		agg.avgDmgB = math.floor(agg.dmgB / n)
 		agg.avgHealA = math.floor(agg.healA / n)
 		agg.avgHealB = math.floor(agg.healB / n)
+		agg.avgDevA = math.floor(agg.devA / n)
+		agg.avgDevB = math.floor(agg.devB / n)
 		agg.winRate = math.floor(agg.winsA / n * 100)
 		table.insert(aggregated, agg)
 	end

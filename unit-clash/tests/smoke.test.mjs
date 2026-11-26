@@ -457,3 +457,60 @@ test('matrixScores ranks units in 0..1 with duel counts', () => {
   assert.ok(byId.medic < byId.heavy, 'medic should lose duels to heavy');
   assert.ok(byId.heavy > byId.scout, 'heavy (2/6 + 4/6) should outscore scout (2/6 + 5/6) on aggregate here');
 });
+
+// ---------------- v0.5 additions: device-targeting AI + device damage accounting ----------------
+
+test('melee units deliberately hunt and destroy enemy turrets', () => {
+  const cfg = mirroredConfig(11);
+  cfg.collectEvents = true;
+  cfg.teams.A.units = [{ type: 'brawler', x: 500, y: 450, upgrade: null }];
+  cfg.teams.B.units = [{ type: 'engineer', x: 1300, y: 450, upgrade: null }];
+  const sim = new BattleSim(cfg);
+  const eng = sim.units.find(u => u.def.id === 'engineer');
+  sim.abTurret(eng);
+  const turret = sim.devices.find(d => d.kind === 'turret');
+  assert.ok(turret, 'turret must exist before the battle starts');
+
+  const brawler = sim.units[0];
+  let sawDeviceTarget = false;
+  let guard = 0;
+  while (!sim.outcome && guard < 6000) {
+    sim.step();
+    if (brawler.attackTarget && brawler.attackTarget.isDevice) sawDeviceTarget = true;
+    guard++;
+  }
+  assert.ok(sim.outcome, 'battle must resolve within the tick guard');
+  assert.ok(sawDeviceTarget, 'brawler must set the enemy turret as its attack target');
+  assert.ok(sim.stats.team.A.deviceDamage > 0, 'team A device damage must be tracked');
+  assert.ok(turret.hp <= 0 || !sim.devices.includes(turret), 'the deployed turret must end up destroyed');
+  const downs = sim.events.filter(e => e.type === 'deviceDown');
+  assert.ok(downs.length >= 1, 'a deviceDown event must be emitted');
+  assert.ok(sim.stats.team.A.kills >= 1 || sim.stats.team.A.deviceDamage >= 70, 'brawler must convert turret pressure into a win path');
+});
+
+test('device damage is credited to team stats, attacker record, aggregation and insights', () => {
+  const cfg = mirroredConfig(23);
+  cfg.teams.A.units = [{ type: 'scout', x: 600, y: 450, upgrade: null }];
+  cfg.teams.B.units = [{ type: 'engineer', x: 1300, y: 450, upgrade: null }];
+  const sim = new BattleSim(cfg);
+  const eng = sim.units.find(u => u.def.id === 'engineer');
+  sim.abTurret(eng);
+  const turret = sim.devices.find(d => d.kind === 'turret');
+  const scout = sim.units[0];
+
+  const applied = sim.damageDevice(scout, turret, 30);
+  assert.equal(applied, 30, 'damageDevice must return the applied amount');
+  assert.equal(sim.stats.team.A.deviceDamage, 30);
+  assert.equal(sim.stats.rec(scout.uid).damageDealt, 30, 'device damage credits the attacker record');
+
+  const snap = { ...sim.stats.snapshot(), outcome: { winner: 'A', reason: 'test', duration: sim.t } };
+  assert.equal(snap.team.A.deviceDamage, 30);
+
+  const agg = aggregate([snap, snap]);
+  assert.equal(agg.avgDeviceDamageA, 30);
+  assert.equal(agg.avgDeviceDamageB, 0);
+
+  const boosted = { ...snap, team: { A: { ...snap.team.A, deviceDamage: 210 }, B: snap.team.B } };
+  const texts = generateInsights(boosted).map(i => i.text).join(' ');
+  assert.match(texts, /device/i, 'insights must surface heavy device damage');
+});

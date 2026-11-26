@@ -74,7 +74,7 @@ function UCSimCore.new(config)
 	self.devices = {}
 	self.projectiles = {}
 	self.events = {}
-	self.stats = { damage = { A = 0, B = 0 }, healing = { A = 0, B = 0 }, abilities = { A = 0, B = 0 } }
+	self.stats = { damage = { A = 0, B = 0 }, healing = { A = 0, B = 0 }, abilities = { A = 0, B = 0 }, devices = { A = 0, B = 0 } }
 	self.regen = {
 		A = config.factions and config.factions.A == "wildgrove" or false,
 		B = config.factions and config.factions.B == "wildgrove" or false,
@@ -297,7 +297,10 @@ function UCSimCore:damageDevice(attacker, device, amount)
 		return
 	end
 	device.hp = math.max(0, device.hp - amount)
+	local byTeam = attacker and attacker.team or (device.team == "A" and "B" or "A")
+	self.stats.devices[byTeam] = self.stats.devices[byTeam] + amount
 	if device.hp <= 0 then
+		device.alive = false
 		self:emit({ type = "deviceDown", x = device.x, z = device.z })
 	end
 end
@@ -404,9 +407,10 @@ function UCSimCore:castAbility(u, target)
 		local enemy = self:nearestEnemy(u)
 		if enemy and math.sqrt((enemy.x - u.x) ^ 2 + (enemy.z - u.z) ^ 2) <= u.def.range + 15 then
 			table.insert(self.devices, {
-				kind = "turret", team = u.team, x = u.x, z = u.z,
+				kind = "turret", isDevice = true, alive = true, team = u.team, x = u.x, z = u.z,
 				hp = ab.hp, maxHp = ab.hp, damage = ab.damage, range = ab.range,
 				cooldown = ab.cooldown2, cd = 0, expires = self.t + ab.lifetime,
+				def = { radius = 1.2, name = "Turret" },
 			})
 			self:emit({ type = "turret", x = u.x, z = u.z, team = u.team })
 		else
@@ -416,8 +420,9 @@ function UCSimCore:castAbility(u, target)
 		local ally = self:woundedAlly(u, u.def.range + 10)
 		if ally then
 			table.insert(self.devices, {
-				kind = "pad", team = u.team, x = ally.x, z = ally.z,
+				kind = "pad", isDevice = true, alive = true, team = u.team, x = ally.x, z = ally.z,
 				hp = ab.padHp or 50, maxHp = ab.padHp or 50,
+				def = { radius = 1.2, name = "Repair Pad" },
 				heal = ab.heal, radius = ab.radius, expires = self.t + ab.lifetime, tickTimer = 0,
 			})
 			self:emit({ type = "pad", x = ally.x, z = ally.z, r = ab.radius })
@@ -453,7 +458,7 @@ end
 
 -- ---------- brains ----------
 
-function UCSimCore:think(u)
+function UCSimCore:thinkBrain(u)
 	local enemy, dist = self:nearestEnemy(u)
 	local brain = u.def.brain
 
@@ -571,6 +576,37 @@ function UCSimCore:think(u)
 	end
 end
 
+-- Counterplay: enemy turrets are priorities. In-range units attack without
+-- repositioning; melee units walk to the turret. Pads only draw fire when
+-- no unit target exists.
+function UCSimCore:devicePriority(u)
+	local dev, devDist = nil, math.huge
+	for _, d in ipairs(self.devices) do
+		if d.alive and d.hp > 0 and d.team ~= u.team then
+			local dd = math.sqrt((d.x - u.x) ^ 2 + (d.z - u.z) ^ 2)
+			if dd < devDist then
+				dev, devDist = d, dd
+			end
+		end
+	end
+	if not dev then
+		return
+	end
+	local inRange = devDist <= u.def.range + (dev.def.radius or 1.2)
+	local melee = not u.def.projectile
+	if dev.kind == "turret" and (inRange or melee) then
+		u.target = dev
+		u.mx, u.mz = dev.x, dev.z
+	elseif dev.kind ~= "turret" and not u.target and inRange then
+		u.target = dev
+	end
+end
+
+function UCSimCore:think(u)
+	self:thinkBrain(u)
+	self:devicePriority(u)
+end
+
 -- ---------- stepping ----------
 
 function UCSimCore:stepUnit(u, dt)
@@ -612,7 +648,9 @@ function UCSimCore:stepUnit(u, dt)
 			u.attackCd = u.def.cooldown
 			local aura = self:aura(u, "might")
 			local dmg = u.def.damage * (1 + (aura and aura.bonus or 0))
-			if u.def.ability and u.def.ability.kind == "bounce" then
+			if target.isDevice then
+				self:damageDevice(u, target, dmg)
+			elseif u.def.ability and u.def.ability.kind == "bounce" then
 				self:castAbility(u, target)
 			else
 				self:fireProjectile(u, target, dmg)
@@ -760,6 +798,7 @@ function UCSimCore:results()
 			damage = math.floor(self.stats.damage[team]),
 			healing = math.floor(self.stats.healing[team]),
 			abilities = self.stats.abilities[team],
+			deviceDamage = math.floor(self.stats.devices[team]),
 		}
 	end
 	return {

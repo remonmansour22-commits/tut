@@ -929,6 +929,7 @@ export class GameController {
         '<div class="statLine"><span>Damage taken</span><b>' + Math.round(ts.damageTaken) + '</b></div>' +
         '<div class="statLine"><span>Healing</span><b>' + Math.round(ts.healing) + '</b></div>' +
         '<div class="statLine"><span>Healing received</span><b>' + Math.round(ts.healingRecv || 0) + '</b></div>' +
+        '<div class="statLine"><span>Device damage</span><b>' + Math.round(ts.deviceDamage || 0) + '</b></div>' +
         '<div class="statLine"><span>Kills / Lost</span><b>' + ts.kills + ' / ' + ts.lost + '</b></div>' +
         '<div class="statLine"><span>Survivors</span><b>' + this.sim.aliveOf(t) + '</b></div>' +
         '</div>';
@@ -1247,10 +1248,11 @@ export class GameController {
           '<td>' + a.avgDuration.toFixed(1) + 's</td>' +
           '<td>' + a.avgSurvivorsA.toFixed(1) + ' / ' + a.avgSurvivorsB.toFixed(1) + '</td>' +
           '<td>' + Math.round(a.avgDamageA) + ' / ' + Math.round(a.avgDamageB) + '</td>' +
-          '<td>' + Math.round(a.avgHealingA) + ' / ' + Math.round(a.avgHealingB) + '</td></tr>';
+          '<td>' + Math.round(a.avgHealingA) + ' / ' + Math.round(a.avgHealingB) + '</td>' +
+          '<td>' + Math.round(a.avgDeviceDamageA || 0) + ' / ' + Math.round(a.avgDeviceDamageB || 0) + '</td></tr>';
       }).join('');
       $('labComparison').innerHTML = '<table>' +
-        '<tr><th>Config</th><th>Runs</th><th>Azure WR</th><th>Crimson WR</th><th>Avg Duration</th><th>Avg Survivors (A/B)</th><th>Avg Dmg (A/B)</th><th>Avg Heal (A/B)</th></tr>' +
+        '<tr><th>Config</th><th>Runs</th><th>Azure WR</th><th>Crimson WR</th><th>Avg Duration</th><th>Avg Survivors (A/B)</th><th>Avg Dmg (A/B)</th><th>Avg Heal (A/B)</th><th>Avg Device Dmg (A/B)</th></tr>' +
         rows + '</table>' +
         '<div class="dim small" style="margin-top:8px">Seeds are deterministic per config+run index, so config differences — not luck — drive results. A few runs ≠ proof; treat ≥25 runs as meaningful evidence.</div>';
 

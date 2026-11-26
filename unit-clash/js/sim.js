@@ -276,6 +276,10 @@ export class BattleSim {
   }
 
   meleeHit(u, target, baseDamage, knockback) {
+    if (target.isDevice) {
+      this.damageDevice(u, target, baseDamage * u.dmgMul());
+      return;
+    }
     let dmg = baseDamage * u.dmgMul();
     let crit = false;
     if (u.dashCrit) { dmg *= 1.8; crit = true; u.dashCrit = false; }
@@ -383,10 +387,12 @@ export class BattleSim {
 
   // ---------- devices are destructible: no more uncounterable Engineer ----------
   damageDevice(attacker, device, amount) {
-    if (!device || device.hp <= 0 || amount <= 0) return;
-    device.hp -= amount;
-    if (device.hp <= 0) device.hp = 0;
+    if (!device || device.hp <= 0 || amount <= 0) return 0;
+    const applied = Math.min(amount, device.hp);
+    device.hp = Math.max(0, device.hp - amount);
+    this.stats.addDeviceDamage(attacker, device, applied);
     if (this.collectEvents) this.events.push({ type: 'deviceHit', x: device.x, y: device.y, color: device.def.color });
+    return applied;
   }
 
   damageDevices(attacker, x, y, r, dmg) {
@@ -453,7 +459,7 @@ export class BattleSim {
     const life = 20 * (u.def.deviceLifeMul || 1);
     const rate = 0.8 / (u.def.deviceRateMul || 1);
     this.devices.push({
-      kind: 'turret', uid: 'd' + (DEV_SEQ++), team: u.team, owner: u, x: u.x - u.facing * 20, y: u.y,
+      kind: 'turret', uid: 'd' + (DEV_SEQ++), isDevice: true, alive: true, team: u.team, owner: u, x: u.x - u.facing * 20, y: u.y,
       hp: 70, maxHp: 70, life, cd: 0.5, rate, dmg: 12,
       boosted: u.hasUpgrade('engineer_upgradeturret'),
       def: { id: 'turret', name: 'Turret', category: 'device', radius: 10, color: '#f0a35e' }
@@ -494,7 +500,7 @@ export class BattleSim {
   abTotem(u) {
     const life = 12 * (u.def.deviceLifeMul || 1);
     this.devices.push({
-      kind: 'totem', uid: 'd' + (DEV_SEQ++), team: u.team, owner: u,
+      kind: 'totem', uid: 'd' + (DEV_SEQ++), isDevice: true, alive: true, team: u.team, owner: u,
       x: clamp(u.x, 40, this.W - 40), y: clamp(u.y, 40, this.H - 40),
       hp: 60, maxHp: 60, life, healRate: 9 * (u.def.healingMul || 1),
       radius: 110, speedAura: u.hasUpgrade('artificer_grove'),
@@ -556,6 +562,7 @@ export class BattleSim {
 
   // ---------- damage & healing ----------
   damage(attacker, target, amount, opts = {}) {
+    if (target.isDevice) return this.damageDevice(attacker, target, amount);
     if (!target.alive || amount <= 0) return 0;
     let amt = amount;
     let armor = target.def.armor || 0;
@@ -742,6 +749,7 @@ export class BattleSim {
       const d = this.devices[i];
       d.life -= dt;
       if (d.hp <= 0 || d.life <= 0) {
+        d.alive = false;
         this.devices.splice(i, 1);
         this.addEvent({ type: 'deviceDown', x: d.x, y: d.y, kind: d.kind, color: d.def.color });
         continue;

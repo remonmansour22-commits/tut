@@ -41,6 +41,11 @@ export class StatsTracker {
   addAbility(unit) {
     if (this.units.has(unit.uid)) this.units.get(unit.uid).abilityUses++;
   }
+  addDeviceDamage(attacker, device, amount) {
+    const t = attacker && attacker.team ? attacker.team : (device.team === 'A' ? 'B' : 'A');
+    this.team[t].deviceDamage += amount;
+    if (attacker && this.units.has(attacker.uid)) this.units.get(attacker.uid).damageDealt += amount;
+  }
   snapshot() {
     const team = JSON.parse(JSON.stringify(this.team));
     team.A.survivors = this.sim.aliveOf('A');
@@ -56,7 +61,7 @@ export class StatsTracker {
 }
 
 function emptyTeamStats() {
-  return { damageDealt: 0, damageTaken: 0, healing: 0, healingRecv: 0, kills: 0, lost: 0 };
+  return { damageDealt: 0, damageTaken: 0, healing: 0, healingRecv: 0, kills: 0, lost: 0, deviceDamage: 0 };
 }
 
 // Aggregate several battle snapshots for one configuration (Battle Lab).
@@ -70,6 +75,7 @@ export function aggregate(snapshots) {
     avgHealingA: 0, avgHealingB: 0,
     avgHealRecvA: 0, avgHealRecvB: 0,
     avgLostA: 0, avgLostB: 0,
+    avgDeviceDamageA: 0, avgDeviceDamageB: 0,
     unitPerf: new Map()
   };
   for (const s of snapshots) {
@@ -82,6 +88,7 @@ export function aggregate(snapshots) {
     agg.avgHealingA += s.team.A.healing; agg.avgHealingB += s.team.B.healing;
     agg.avgHealRecvA += s.team.A.healingRecv || 0; agg.avgHealRecvB += s.team.B.healingRecv || 0;
     agg.avgLostA += s.team.A.lost; agg.avgLostB += s.team.B.lost;
+    agg.avgDeviceDamageA += s.team.A.deviceDamage || 0; agg.avgDeviceDamageB += s.team.B.deviceDamage || 0;
     for (const u of s.units) {
       const key = u.team + ':' + u.unitId;
       let rec = agg.unitPerf.get(key);
@@ -101,6 +108,7 @@ export function aggregate(snapshots) {
   agg.avgHealingA /= n; agg.avgHealingB /= n;
   agg.avgHealRecvA /= n; agg.avgHealRecvB /= n;
   agg.avgLostA /= n; agg.avgLostB /= n;
+  agg.avgDeviceDamageA /= n; agg.avgDeviceDamageB /= n;
   return agg;
 }
 
@@ -163,6 +171,13 @@ export function generateInsights(snapshot) {
         out.push({ team: t, icon: 'coins', text: `${teamName(t)} spent ${Math.round(c / total * 100)}% of its budget on ${cat} units and lost most of the army — a heavily one-role army can collapse to a hard counter.` });
         break;
       }
+    }
+  }
+
+  for (const t of ['A', 'B']) {
+    const dd = team[t].deviceDamage || 0;
+    if (dd >= 150) {
+      out.push({ team: t, icon: 'coins', text: `${teamName(t)}'s devices dealt ${Math.round(dd)} damage \u2014 that Engineer investment more than paid for itself.` });
     }
   }
 

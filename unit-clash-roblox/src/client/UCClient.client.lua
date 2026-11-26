@@ -392,8 +392,8 @@ evResults.OnClientEvent:Connect(function(payload)
 	showTimeline(payload.timeline or {})
 	local function line(teamId)
 		local t = result[teamId]
-		return string.format("%s - %d deployed, %d survivors, %d damage, %d healing, %d abilities",
-			UCConfig.TEAMS[teamId].name, t.deployed, t.survivors, t.damage, t.healing, t.abilities)
+		return string.format("%s - %d deployed, %d survivors, %d damage, %d healing, %d abilities, %d device dmg",
+			UCConfig.TEAMS[teamId].name, t.deployed, t.survivors, t.damage, t.healing, t.abilities, t.deviceDamage or 0)
 	end
 	if result.winner == "draw" then
 		resultsTitle.Text = "DRAW"
@@ -417,8 +417,8 @@ evLab.OnClientEvent:Connect(function(payload)
 	elseif payload.stage == "done" then
 		labStatus.Text = payload.label .. " - done. Results:"
 		for _, agg in ipairs(payload.aggregated) do
-			labStatus.Text = labStatus.Text .. string.format("\n%s: A wins %d%% (draws %d), avg %ds, surv %.1f/%.1f, heal %d/%d",
-				agg.name, agg.winRate, agg.draws, agg.avgDuration, agg.avgSurvA, agg.avgSurvB, agg.avgHealA, agg.avgHealB)
+			labStatus.Text = labStatus.Text .. string.format("\n%s: A wins %d%% (draws %d), avg %ds, surv %.1f/%.1f, heal %d/%d, dev %d/%d",
+				agg.name, agg.winRate, agg.draws, agg.avgDuration, agg.avgSurvA, agg.avgSurvB, agg.avgHealA, agg.avgHealB, agg.avgDevA or 0, agg.avgDevB or 0)
 			if #labStatus.Text > 900 then
 				break
 			end
