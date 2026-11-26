@@ -159,7 +159,7 @@ local function snapshotFor(core)
 	local units, projs, devs, fx = {}, {}, {}, {}
 	for _, u in ipairs(core.units) do
 		if u.alive then
-			table.insert(units, { u.id, u.type, u.team, u.x, u.z, u.hp, u.maxHp, u.def.radius or 1 })
+			table.insert(units, { u.id, u.type, u.team, u.x, u.z, u.hp, u.maxHp, u.def.radius or 1, (core.t - (u.lastAtk or -9)) < 0.22 })
 		end
 	end
 	for _, p in ipairs(core.projectiles) do
@@ -693,6 +693,10 @@ handlers.labHistory = function(player, args)
 		evLab:FireAllClients({ stage = "history", history = lab:loadHistory() })
 	end
 end
+
+evState.OnServerEvent:Connect(function(player)
+	broadcastState()
+end)
 
 evAction.OnServerEvent:Connect(function(player, cmd, args)
 	if type(cmd) ~= "string" then

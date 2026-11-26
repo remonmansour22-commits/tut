@@ -107,8 +107,8 @@ local field = mk("Frame", {
 	Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = THEME.bg, BorderSizePixel = 0, ZIndex = 1,
 }, gui)
 
-local BAND_TOP, BAND_BOTTOM = 0.50, 0.86
-local X0, X1 = 0.02, 0.98
+local BAND_TOP, BAND_BOTTOM = 0.12, 0.92
+local X0, X1 = 0.015, 0.985
 
 local sky = mk("Frame", {
 	Size = UDim2.new(1, 0, BAND_TOP, 0), BackgroundColor3 = Color3.fromRGB(24, 28, 52),
@@ -146,6 +146,28 @@ mk("Frame", { -- crimson half tint
 	BackgroundColor3 = UCConfig.TEAMS.B.color, BackgroundTransparency = 0.93, BorderSizePixel = 0, ZIndex = 2,
 }, field)
 
+local centerCircle = mk("Frame", { -- stadium center circle
+	Size = UDim2.new(0.16, 0, 0.62, 0), Position = UDim2.new(0.5, 0, (BAND_TOP + BAND_BOTTOM) / 2, 0),
+	AnchorPoint = Vector2.new(0.5, 0.5), BackgroundTransparency = 1, ZIndex = 2,
+}, field)
+mk("UIStroke", { Color = Color3.fromRGB(255, 255, 255), Thickness = 2, Transparency = 0.82 }, centerCircle)
+for _, sx in ipairs({ 0.26, 0.74 }) do
+	mk("Frame", {
+		Size = UDim2.new(0, 2, BAND_BOTTOM - BAND_TOP, 0), Position = UDim2.new(sx, 0, BAND_TOP, 0),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 0.9, BorderSizePixel = 0, ZIndex = 2,
+	}, field)
+end
+
+local dust = {}
+for i = 1, 8 do
+	local d = mk("Frame", {
+		Size = UDim2.fromScale(0.004, 0.008), Position = UDim2.fromScale(math.random(), 0.2 + math.random() * 0.6),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 0.8, BorderSizePixel = 0, ZIndex = 2,
+	}, field)
+	corner(d, 999)
+	table.insert(dust, { frame = d, speed = 0.01 + math.random() * 0.02, x = math.random(), y = 0.15 + math.random() * 0.65 })
+end
+
 local arenaNameTag = label({
 	Size = UDim2.new(0, 300, 0, 22), Position = UDim2.new(0.5, -150, BAND_BOTTOM + 0.005, 0),
 	Text = "", TextColor3 = THEME.dim, TextSize = 12, ZIndex = 2,
@@ -179,36 +201,38 @@ local projPool = {}
 local targetPos = {}
 
 local function unitSize(radius)
-	return math.clamp(radius * 0.024, 0.018, 0.042)
+	return math.clamp(radius * 0.05, 0.035, 0.085)
 end
 
 local function makeUnitVisual(id, def, team)
 	local sz = unitSize(def.radius or 1)
 	local root = mk("Frame", {
-		Size = UDim2.new(0, sz, 0, sz), AnchorPoint = Vector2.new(0.5, 0.5),
+		Size = UDim2.fromScale(sz, sz), AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = def.color or Color3.fromRGB(200, 200, 200), BorderSizePixel = 0, ZIndex = 5,
 	}, layerUnits)
 	corner(root, 999)
-	mk("UIStroke", { Color = UCConfig.TEAMS[team].color, Thickness = 2, Transparency = 0.1 }, root)
-	local core = mk("Frame", { -- core highlight
-		Size = UDim2.new(0.42, 0, 0.42, 0), Position = UDim2.new(0.29, 0, 0.29, 0),
-		BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 0.55, BorderSizePixel = 0, ZIndex = 6,
+	mk("UIGradient", { Rotation = 60, Color = ColorSequence.new(Color3.fromRGB(255, 255, 255), Color3.fromRGB(140, 140, 150)) }, root)
+	mk("UIStroke", { Color = UCConfig.TEAMS[team].color, Thickness = 3, Transparency = 0.05 }, root)
+	local shadow = mk("Frame", { -- ground shadow ellipse
+		Size = UDim2.new(1.15, 0, 0.34, 0), Position = UDim2.fromScale(0.5, 0.94), AnchorPoint = Vector2.new(0.5, 0.5),
+		BackgroundColor3 = Color3.fromRGB(0, 0, 0), BackgroundTransparency = 0.65, BorderSizePixel = 0, ZIndex = 4,
+	}, root)
+	corner(shadow, 999)
+	local core = mk("Frame", {
+		Size = UDim2.fromScale(0.38, 0.38), Position = UDim2.fromScale(0.31, 0.24),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 0.5, BorderSizePixel = 0, ZIndex = 6,
 	}, root)
 	corner(core, 999)
-	local bar = mk("Frame", {
-		Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(0.5, 0, 0.5, 0), AnchorPoint = Vector2.new(0.5, 0.5),
-		BackgroundTransparency = 1, ZIndex = 7,
-	}, layerUnits)
 	local barBg = mk("Frame", {
-		Size = UDim2.new(1.15, 0, 0, 0), Position = UDim2.new(0.5, 0, 0.5, 0), AnchorPoint = Vector2.new(0.5, 0.5),
-		BackgroundColor3 = Color3.fromRGB(10, 10, 14), BorderSizePixel = 0, Visible = false, ZIndex = 7,
-	}, bar)
-	corner(barBg, 2)
+		Size = UDim2.new(1.25, 0, 0.1, 0), Position = UDim2.fromScale(0.5, -0.1), AnchorPoint = Vector2.new(0.5, 1),
+		BackgroundColor3 = Color3.fromRGB(8, 9, 14), BorderSizePixel = 0, Visible = false, ZIndex = 7,
+	}, root)
+	corner(barBg, 999)
 	local barFill = mk("Frame", {
-		Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = THEME.green, BorderSizePixel = 0, ZIndex = 8,
+		Size = UDim2.fromScale(1, 1), BackgroundColor3 = THEME.green, BorderSizePixel = 0, ZIndex = 8,
 	}, barBg)
-	corner(barFill, 2)
-	unitPool[id] = { root = root, bar = bar, barBg = barBg, barFill = barFill, size = sz }
+	corner(barFill, 999)
+	unitPool[id] = { root = root, barBg = barBg, barFill = barFill, size = sz, team = team, phase = (id:len() * 13) % 6.28, pulse = 0, wasAtk = false }
 	targetPos[id] = nil
 	return unitPool[id]
 end
@@ -217,7 +241,6 @@ local function destroyUnitVisual(id)
 	local v = unitPool[id]
 	if v then
 		v.root:Destroy()
-		v.bar:Destroy()
 		unitPool[id] = nil
 		targetPos[id] = nil
 	end
@@ -231,35 +254,42 @@ local function makeDeviceVisual(key, entry)
 	local kind, team = entry[1], entry[3]
 	local r = entry[7] or 3
 	local isTurret = kind == "turret"
-	local sz = math.clamp(r * 0.05, 0.022, 0.05)
+	local sz = math.clamp(r * 0.055, 0.03, 0.075)
 	local root = mk("Frame", {
-		Size = UDim2.new(0, sz, 0, sz), AnchorPoint = Vector2.new(0.5, 0.5),
+		Size = UDim2.fromScale(sz, sz * 0.72), AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = isTurret and UCConfig.TEAMS[team].color or Color3.fromRGB(90, 230, 160),
 		BackgroundTransparency = isTurret and 0 or 0.55, BorderSizePixel = 0, ZIndex = 4,
 	}, layerDevices)
 	if isTurret then
 		corner(root, 4)
-		mk("UIStroke", { Color = Color3.fromRGB(255, 255, 255), Thickness = 1.5, Transparency = 0.4 }, root)
+		mk("UIStroke", { Color = Color3.fromRGB(255, 255, 255), Thickness = 2, Transparency = 0.35 }, root)
+		mk("UIGradient", { Rotation = 60, Color = ColorSequence.new(Color3.fromRGB(255, 255, 255), Color3.fromRGB(150, 150, 160)) }, root)
 	else
 		corner(root, 999)
+		mk("UIStroke", { Color = Color3.fromRGB(160, 255, 200), Thickness = 2, Transparency = 0.5 }, root)
 	end
 	local barBg = mk("Frame", {
-		Size = UDim2.new(1, 0, 0, 3), Position = UDim2.new(0, 0, -0.18, 0),
-		BackgroundColor3 = Color3.fromRGB(10, 10, 14), BorderSizePixel = 0, ZIndex = 4,
+		Size = UDim2.new(1.1, 0, 0, 4), Position = UDim2.fromScale(0.5, -0.22), AnchorPoint = Vector2.new(0.5, 1),
+		BackgroundColor3 = Color3.fromRGB(8, 9, 14), BorderSizePixel = 0, ZIndex = 4,
 	}, root)
-	corner(barBg, 2)
-	local barFill = mk("Frame", { Size = UDim2.new(1, 0, 1, 0), BackgroundColor3 = THEME.green, BorderSizePixel = 0, ZIndex = 5 }, barBg)
-	corner(barFill, 2)
+	corner(barBg, 999)
+	local barFill = mk("Frame", { Size = UDim2.fromScale(1, 1), BackgroundColor3 = THEME.green, BorderSizePixel = 0, ZIndex = 5 }, barBg)
+	corner(barFill, 999)
 	devicePool[key] = { root = root, barFill = barFill }
 	return devicePool[key]
 end
 
 local function makeProjVisual()
 	local p = mk("Frame", {
-		Size = UDim2.new(0.006, 0, 0.011, 0), AnchorPoint = Vector2.new(0.5, 0.5),
+		Size = UDim2.fromScale(0.009, 0.016), AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255), BorderSizePixel = 0, ZIndex = 6, Visible = false,
 	}, layerProj)
 	corner(p, 999)
+	local tail = mk("Frame", {
+		Size = UDim2.fromScale(0.55, 0.55), AnchorPoint = Vector2.new(0.5, 0.5),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 0.55, BorderSizePixel = 0, ZIndex = 5,
+	}, p)
+	corner(tail, 999)
 	return p
 end
 
@@ -357,11 +387,19 @@ local FX_STYLES = {
 	pad = function() end,
 }
 
+local animClock = 0
+local shake = 0
+
 local function handleFx(fxList)
 	for _, e in ipairs(fxList) do
 		local fn = FX_STYLES[e[1]]
 		if fn then
 			fn(e)
+		end
+		if e[1] == "death" or e[1] == "deviceDown" then
+			shake = math.min(0.014, shake + 0.006)
+		elseif e[1] == "rebirth" then
+			shake = math.min(0.02, shake + 0.01)
 		end
 	end
 end
@@ -374,13 +412,6 @@ evBattle.OnClientEvent:Connect(function(snap)
 	latestSnapshot = snap
 end)
 
-local function setProj(v, p)
-	v.Visible = true
-	local fx, fz = simToScale(p[1], p[2])
-	v.Position = UDim2.new(fx, 0, fz, 0)
-	v.BackgroundColor3 = teamColorOf(p[3])
-end
-
 local function applySnapshot(snap)
 	local seen = {}
 	for _, e in ipairs(snap.units) do
@@ -389,16 +420,18 @@ local function applySnapshot(snap)
 		local def = UCConfig.get(e[2]) or { color = nil, radius = 1 }
 		local v = unitPool[id] or makeUnitVisual(id, def, e[3])
 		local fx, fz = simToScale(e[4], e[5])
-		local prev = targetPos[id]
-		targetPos[id] = { fx, fz }
-		if not prev then
-			v.root.Position = UDim2.new(fx, 0, fz, 0)
-			v.bar.Position = UDim2.new(fx, 0, fz, 0)
+		if not targetPos[id] then
+			v.root.Position = UDim2.fromScale(fx, fz)
 		end
-		v.root.Size = UDim2.new(0, v.size, 0, v.size)
+		targetPos[id] = { fx, fz }
+		local atk = e[9] == true
+		if atk and not v.wasAtk then
+			v.pulse = 1
+		end
+		v.wasAtk = atk
 		local frac = math.clamp(e[6] / math.max(1, e[7]), 0, 1)
 		v.barBg.Visible = frac < 0.999
-		v.barFill.Size = UDim2.new(frac, 0, 1, 0)
+		v.barFill.Size = UDim2.fromScale(frac, 1)
 		v.barFill.BackgroundColor3 = Color3.fromRGB(255, 90, 80):Lerp(THEME.green, frac)
 	end
 	for id in pairs(unitPool) do
@@ -413,8 +446,8 @@ local function applySnapshot(snap)
 		devSeen[key] = true
 		local v = devicePool[key] or makeDeviceVisual(key, d)
 		local fx, fz = simToScale(d[4], d[5])
-		v.root.Position = UDim2.new(fx, 0, fz, 0)
-		v.barFill.Size = UDim2.new(math.clamp(d[5] / math.max(1, d[6]), 0, 1), 0, 1, 0)
+		v.root.Position = UDim2.fromScale(fx, fz)
+		v.barFill.Size = UDim2.fromScale(math.clamp(d[5] / math.max(1, d[6]), 0, 1), 1)
 	end
 	for key, v in pairs(devicePool) do
 		if not devSeen[key] then
@@ -431,7 +464,20 @@ local function applySnapshot(snap)
 			v = makeProjVisual()
 			projPool[projCount] = v
 		end
-		setProj(v, p)
+		local fx, fz = simToScale(p[1], p[2])
+		if v.Visible then
+			v.prevX, v.prevY = v.Position.X.Scale, v.Position.Y.Scale
+		else
+			v.prevX, v.prevY = fx, fz
+		end
+		v.Position = UDim2.fromScale(fx, fz)
+		v.BackgroundColor3 = teamColorOf(p[3])
+		v.Visible = true
+		local dirX, dirY = fx - (v.prevX or fx), fz - (v.prevY or fz)
+		local len = math.sqrt(dirX * dirX + dirY * dirY)
+		if len > 0.0001 then
+			v.Rotation = math.deg(math.atan2(dirY, dirX))
+		end
 	end
 	for i = projCount + 1, #projPool do
 		projPool[i].Visible = false
@@ -448,6 +494,7 @@ RunService.Heartbeat:Connect(function(dt)
 		cam.CameraType = Enum.CameraType.Scriptable
 		cam.CFrame = CFrame.new(Vector3.new(0, 300, 0), Vector3.new(0, 0, 0))
 	end
+	animClock = animClock + dt
 
 	if latestSnapshot then
 		applySnapshot(latestSnapshot)
@@ -457,9 +504,27 @@ RunService.Heartbeat:Connect(function(dt)
 	for id, v in pairs(unitPool) do
 		local t = targetPos[id]
 		if t then
-			v.root.Position = v.root.Position:Lerp(UDim2.new(t[1], 0, t[2], 0), 0.35)
-			v.bar.Position = v.root.Position
+			v.root.Position = v.root.Position:Lerp(UDim2.fromScale(t[1], t[2]), 0.35)
 		end
+		v.pulse = v.pulse * math.exp(-dt * 7)
+		local pop = 1 + 0.3 * v.pulse
+		v.root.Size = UDim2.fromScale(v.size * pop, v.size * pop)
+		local bob = math.sin(animClock * 3 + v.phase) * 0.003
+		local lunge = v.pulse * (v.team == "A" and 0.008 or -0.008)
+		local base = v.root.Position
+		v.root.Position = UDim2.fromScale(base.X.Scale + lunge, base.Y.Scale + bob - v.pulse * 0.004)
+	end
+
+	for _, d in ipairs(dust) do
+		d.x = (d.x + d.speed * dt) % 1
+		d.frame.Position = UDim2.fromScale(d.x, d.y + math.sin(animClock + d.speed * 100) * 0.01)
+	end
+
+	if shake > 0.0005 then
+		field.Position = UDim2.fromOffset((math.random() * 2 - 1) * shake * 900, (math.random() * 2 - 1) * shake * 600)
+		shake = shake * math.exp(-dt * 6)
+	else
+		field.Position = UDim2.fromOffset(0, 0)
 	end
 
 	for _, p in ipairs(popupPool) do
@@ -520,11 +585,21 @@ local clashB = mk("Frame", {
 }, menu)
 corner(clashB, 999)
 
-label({ Size = UDim2.new(1, 0, 0, 90), Position = UDim2.new(0, 0, 0.26, 0), Text = "UNIT CLASH", TextColor3 = THEME.gold, Font = Enum.Font.GothamBlack, TextSize = 68, ZIndex = 3 }, menu)
-label({ Size = UDim2.new(1, 0, 0, 26), Position = UDim2.new(0, 0, 0.26, 92), Text = "2D AUTONOMOUS BATTLE SANDBOX", TextColor3 = THEME.dim, Font = Enum.Font.GothamBold, TextSize = 16, ZIndex = 3 }, menu)
+local title = label({ Size = UDim2.new(1, 0, 0, 96), Position = UDim2.new(0, 0, 0.24, 0), Text = "UNIT CLASH", TextColor3 = Color3.fromRGB(255, 255, 255), Font = Enum.Font.GothamBlack, TextSize = 76, ZIndex = 3 }, menu)
+mk("UIGradient", { Rotation = 90, Color = ColorSequence.new(Color3.fromRGB(255, 232, 150), Color3.fromRGB(255, 170, 60)) }, title)
+mk("UIStroke", { Color = Color3.fromRGB(60, 40, 10), Thickness = 2, Transparency = 0.2 }, title)
+label({ Size = UDim2.new(1, 0, 0, 26), Position = UDim2.new(0, 0, 0.24, 98), Text = "2D  AUTONOMOUS  BATTLE  SANDBOX", TextColor3 = THEME.dim, Font = Enum.Font.GothamBold, TextSize = 16, ZIndex = 3 }, menu)
 
 local btnPlay = button("ENTER BATTLE", Color3.fromRGB(52, 160, 92), { Size = UDim2.new(0, 280, 0, 58), Position = UDim2.new(0.5, -140, 0.52, 0), TextSize = 20, ZIndex = 3 }, menu)
-label({ Size = UDim2.new(1, 0, 0, 22), Position = UDim2.new(0, 0, 0.52, 66), Text = "15 units - 4 factions - 6 arenas - Battle Lab - tournaments", TextColor3 = THEME.dim, TextSize = 13, ZIndex = 3 }, menu)
+local btnQuick = button("QUICK START - auto-fill both armies and fight", Color3.fromRGB(90, 70, 130), { Size = UDim2.new(0, 340, 0, 40), Position = UDim2.new(0.5, -170, 0.52, 70), TextSize = 13, ZIndex = 3 }, menu)
+btnQuick.MouseButton1Click:Connect(function()
+	menu.Enabled = false
+	gui.Enabled = true
+	act("randomArmyA", {})
+	act("fillEnemy", {})
+	act("start", {})
+end)
+label({ Size = UDim2.new(1, 0, 0, 22), Position = UDim2.new(0, 0, 0.52, 118), Text = "15 units - 4 factions - 6 arenas - Battle Lab - tournaments", TextColor3 = THEME.dim, TextSize = 13, ZIndex = 3 }, menu)
 label({ Size = UDim2.new(1, 0, 0, 20), Position = UDim2.new(0, 0, 1, -30), Text = "v0.6 - pick a unit, click your half, START. Deterministic simulation, real counterplay.", TextColor3 = Color3.fromRGB(110, 115, 135), TextSize = 11, ZIndex = 3 }, menu)
 
 task.spawn(function()
@@ -546,6 +621,14 @@ end)
 -- ============================================================
 -- COMMAND UI
 -- ============================================================
+
+local hintBar = label({
+	Size = UDim2.new(0, 560, 0, 34), Position = UDim2.new(0.5, -280, 0.5, 12),
+	BackgroundColor3 = Color3.fromRGB(20, 24, 40), BackgroundTransparency = 0.1,
+	Text = "1) PICK A UNIT ON THE LEFT      2) CLICK YOUR HALF TO PLACE      3) PRESS START",
+	TextColor3 = THEME.gold, TextSize = 13, Font = Enum.Font.GothamBold, ZIndex = 12,
+}, gui)
+corner(hintBar, 6)
 
 local toast = label({
 	Size = UDim2.new(0, 380, 0, 34), Position = UDim2.new(0.5, -190, 0, 46),
@@ -680,16 +763,21 @@ local up1, up2
 
 for order, unitId in ipairs(UCConfig.ORDER) do
 	local def = UCConfig.get(unitId)
-	local card = button("", THEME.card, { Size = UDim2.new(1, -12, 0, 56), LayoutOrder = order, ZIndex = 11 }, palette)
+	local card = button("", THEME.card, { Size = UDim2.new(1, -12, 0, 64), LayoutOrder = order, ZIndex = 11 }, palette)
 	corner(card, 6)
+	local selStroke = mk("UIStroke", { Color = THEME.gold, Thickness = 2, Transparency = 1 }, card)
 	mk("Frame", { Size = UDim2.new(0, 8, 1, -10), Position = UDim2.new(0, 5, 0, 5), BackgroundColor3 = def.color, BorderSizePixel = 0, ZIndex = 12 }, card)
 	label({ Size = UDim2.new(1, -30, 0, 18), Position = UDim2.new(0, 20, 0, 6), Text = def.name .. "  (" .. def.cost .. ")", TextColor3 = THEME.text, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 12 }, card)
 	label({ Size = UDim2.new(1, -30, 0, 26), Position = UDim2.new(0, 20, 0, 25), Text = def.desc .. "  -  Lv" .. def.unlockLevel .. "+", TextColor3 = THEME.dim, TextSize = 9, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top, ZIndex = 12 }, card)
 	cardByUnit[unitId] = card
 	card.MouseButton1Click:Connect(function()
 		state.selectedUnit = unitId
-		for id, c in pairs(cardByUnit) do
-			c.BackgroundColor3 = id == unitId and Color3.fromRGB(70, 90, 60) or THEME.card
+		for cid, c in pairs(cardByUnit) do
+			c.BackgroundColor3 = cid == unitId and Color3.fromRGB(52, 66, 46) or THEME.card
+			local st = c:FindFirstChildOfClass("UIStroke")
+			if st then
+				st.Transparency = cid == unitId and 0 or 1
+			end
 		end
 		local ups = UCConfig.upgradesFor(unitId)
 		upgradeTitle.Text = "UPGRADE - " .. def.name
@@ -994,7 +1082,7 @@ local function showStaged(staged)
 				local sz = unitSize(def.radius or 1)
 				local fx, fz = simToScale(e.x, e.z)
 				local dot = mk("Frame", {
-					Size = UDim2.new(0, sz, 0, sz), Position = UDim2.new(fx, 0, fz, 0), AnchorPoint = Vector2.new(0.5, 0.5),
+					Size = UDim2.fromScale(sz, sz), Position = UDim2.fromScale(fx, fz), AnchorPoint = Vector2.new(0.5, 0.5),
 					BackgroundColor3 = def.color, BackgroundTransparency = 0.25, BorderSizePixel = 0, ZIndex = 3,
 				}, layerStaged)
 				corner(dot, 999)
@@ -1044,8 +1132,10 @@ evState.OnClientEvent:Connect(function(s)
 
 	if s.phase == "setup" then
 		showStaged(s.staged)
+		hintBar.Visible = true
 	else
 		clearStagedMarkers()
+		hintBar.Visible = false
 	end
 
 	if s.mode == "survival" and s.wave > 0 then

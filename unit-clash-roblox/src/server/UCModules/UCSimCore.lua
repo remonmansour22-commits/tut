@@ -646,6 +646,7 @@ function UCSimCore:stepUnit(u, dt)
 		local td = math.sqrt((target.x - u.x) ^ 2 + (target.z - u.z) ^ 2)
 		if td <= u.def.range + target.def.radius and u.attackCd <= 0 and u.def.damage > 0 then
 			u.attackCd = u.def.cooldown
+			u.lastAtk = self.t
 			local aura = self:aura(u, "might")
 			local dmg = u.def.damage * (1 + (aura and aura.bonus or 0))
 			if target.isDevice then
