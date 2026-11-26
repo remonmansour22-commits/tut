@@ -11,10 +11,11 @@
     "ServerScriptService": {
       "$className": "ServerScriptService",
       "BeastboundBootstrap": {
-        "$path": "src/server/BeastboundBootstrap.server.lua"
+        "$path": "src/server/BeastboundModules/BeastboundBootstrap.server.lua"
       },
       "BeastboundModules": {
-        "$path": "src/server/BeastboundModules"
+        "$path": "src/server/BeastboundModules",
+        "$ignoreGlobs": ["**/BeastboundBootstrap.server.lua"]
       }
     },
     "StarterPlayer": {
