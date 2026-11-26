@@ -235,31 +235,4 @@ function UCVisuals.padModel(position, radius)
 	return pad
 end
 
-function UCVisuals.victoryBanner(winnerName, color)
-	local cam = workspace.CurrentCamera
-	local part = basePart({
-		Size = Vector3.new(30, 6, 0.5),
-		Color = color,
-		Material = Enum.Material.Neon,
-		CFrame = CFrame.new(Vector3.new(0, 26, 0)),
-		Name = "UCVictoryBanner",
-	})
-	local gui = Instance.new("BillboardGui")
-	gui.Size = UDim2.new(1, 0, 1, 0)
-	gui.AlwaysOnTop = true
-	gui.Adornee = part
-	gui.Parent = part
-	local label = Instance.new("TextLabel")
-	label.Size = UDim2.new(1, 0, 1, 0)
-	label.BackgroundTransparency = 1
-	label.Text = winnerName .. " WINS!"
-	label.TextScaled = true
-	label.Font = Enum.Font.GothamBlack
-	label.TextColor3 = Color3.fromRGB(255, 255, 255)
-	label.TextStrokeTransparency = 0.2
-	label.Parent = gui
-	part.Parent = workspace
-	return part
-end
-
 return UCVisuals
