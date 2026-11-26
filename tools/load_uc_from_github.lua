@@ -20,10 +20,30 @@ local StarterPlayer = game:GetService("StarterPlayer")
 local StarterPlayerScripts = StarterPlayer:WaitForChild("StarterPlayerScripts")
 
 local REPO = "remonmansour22-commits/tut"
-local BRANCH = "main"
 local ROOT = "unit-clash-roblox/"
-local RAW = ("https://raw.githubusercontent.com/%s/%s/"):format(REPO, BRANCH)
-local TREE_API = ("https://api.github.com/repos/%s/git/trees/%s?recursive=1"):format(REPO, BRANCH)
+-- Primary branch first, fallback to the development (PR) branch.
+local BRANCHES = { "main", "vibe/unit-clash-f886b5" }
+local BRANCH, RAW, TREE_API
+
+local function pickBranch()
+	for _, b in ipairs(BRANCHES) do
+		local url = ("https://api.github.com/repos/%s/git/trees/%s?recursive=1"):format(REPO, b)
+		local tree = HttpService:JSONDecode(HttpService:GetAsync(url))
+		local count = 0
+		for _, item in ipairs(tree.tree) do
+			if item.type == "blob" and item.path:sub(1, #ROOT) == ROOT and item.path:match("%.lua$") then
+				count = count + 1
+			end
+		end
+		if count > 0 then
+			BRANCH = b
+			RAW = ("https://raw.githubusercontent.com/%s/%s/"):format(REPO, b)
+			TREE_API = url
+			return tree
+		end
+	end
+	error("No .lua files under " .. ROOT .. " found on any known branch of " .. REPO)
+end
 
 local function ensureFolder(parent, name)
 	local folder = parent:FindFirstChild(name)
@@ -79,7 +99,7 @@ local function ensureInstance(parent, name, className)
 end
 
 local ok, err = pcall(function()
-	local tree = HttpService:JSONDecode(HttpService:GetAsync(TREE_API))
+	local tree = pickBranch()
 	local files = {}
 	for _, item in ipairs(tree.tree) do
 		if item.type == "blob" and item.path:sub(1, #ROOT) == ROOT and item.path:match("%.lua$") then
