@@ -23,9 +23,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: rojo-rbx/setup-rojo@v1
-        with:
-          version: "7.4.4"
+      - name: Install Rojo
+        run: |
+          curl -sL "https://github.com/rojo-rbx/rojo/releases/download/v7.4.4/rojo-7.4.4-linux-x86_64.zip" -o /tmp/rojo.zip
+          unzip -o /tmp/rojo.zip -d /tmp/rojo-bin
+          sudo install /tmp/rojo-bin/rojo /usr/local/bin/rojo
+          rojo --version
 
       - name: Build BEASTBOUND place file
         run: rojo build default.project.json -o build/Beastbound_TheGreatMigration.rbxlx
