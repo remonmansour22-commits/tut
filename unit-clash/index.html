@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNIT CLASH — 2D Battle Sandbox</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="topbar">
+    <div id="logo">UNIT<span>CLASH</span></div>
+
+    <nav id="modeTabs">
+      <button data-mode="sandbox" class="tab active">Sandbox</button>
+      <button data-mode="campaign" class="tab">Campaign</button>
+      <button data-mode="survival" class="tab">Survival</button>
+      <button data-mode="daily" class="tab">Daily</button>
+      <button data-mode="lab" class="tab">Battle Lab</button>
+    </nav>
+
+    <div id="budgetReadout">
+      <span class="teamTag blue">AZURE <b id="budgetA">0</b></span>
+      <span class="teamTag red">CRIMSON <b id="budgetB">0</b></span>
+      <span id="unitCount" class="dim"></span>
+    </div>
+
+    <div id="battleControls">
+      <button id="btnQuick" title="Instant battle with two random armies">⚡ Quick Battle</button>
+      <button id="btnStart" class="primary">▶ Start</button>
+      <button id="btnPauseResume" disabled>⏸ Pause</button>
+      <button id="btnReset" disabled>⟲ Reset</button>
+      <select id="speedSelect" title="Battle speed">
+        <option value="0.25">0.25×</option>
+        <option value="0.5">0.5×</option>
+        <option value="1" selected>1×</option>
+        <option value="2">2×</option>
+        <option value="4">4×</option>
+      </select>
+      <button id="btnFollow" title="Follow selected unit">🎯 Follow</button>
+      <button id="btnOverview" title="Zoom to overview">⌂ Overview</button>
+      <button id="btnEnd" disabled>■ End</button>
+    </div>
+
+    <div id="envControls">
+      <select id="arenaSelect" title="Arena"></select>
+      <div id="modifierBar"></div>
+      <label class="dim" for="timeLimitInput">Limit</label>
+      <input id="timeLimitInput" type="number" min="20" max="300" value="90">
+      <button id="btnSeed" title="Reroll battle seed (randomness)">🎲 Seed</button>
+      <button id="btnMute" title="Toggle sound">🔊</button>
+    </div>
+  </header>
+
+  <main id="layout">
+    <aside id="leftPanel">
+      <div id="categoryTabs"></div>
+      <div id="unitPalette"></div>
+      <button id="btnRandomArmy" class="wide">🎲 Random Armies</button>
+      <div id="factionLegend"></div>
+    </aside>
+
+    <div id="centerStage">
+      <canvas id="battlefield"></canvas>
+      <div id="modeBanner" class="hidden"></div>
+      <div id="resultsPanel" class="hidden">
+        <div id="resultsContent"></div>
+        <div class="row">
+          <button id="btnRematch" class="primary">↻ Rematch (new seed)</button>
+          <button id="btnEdit">✎ Edit Armies</button>
+          <button id="btnToLab">🧪 Send to Battle Lab</button>
+          <button id="btnNextMission" class="hidden primary">Next Mission →</button>
+          <button id="btnNextWave" class="hidden primary">Next Wave →</button>
+        </div>
+      </div>
+    </div>
+
+    <aside id="rightPanel">
+      <section class="panel">
+        <h3>Placement</h3>
+        <div id="placementTeam">
+          <button data-team="A" class="teamBtn active blue">Team Azure</button>
+          <button data-team="B" class="teamBtn red">Team Crimson</button>
+        </div>
+        <div id="infoPanel" class="dim">Select a unit from the palette, then click your half of the field to place it.<br><br>Drag to move · Right-click to remove · Alt-click to duplicate.</div>
+      </section>
+
+      <section class="panel">
+        <h3>Formation Tools</h3>
+        <div id="formationTools">
+          <button data-form="line">Line</button>
+          <button data-form="wedge">Wedge</button>
+          <button data-form="wall">Wall</button>
+          <button data-form="spread">Spread</button>
+          <button data-form="mirror">Mirror A→B</button>
+          <button data-form="clear">Clear Team</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h3>Saved Setups</h3>
+        <div class="row">
+          <button id="btnSaveConfig">💾 Save</button>
+          <button id="btnLoadConfig">📂 Load</button>
+          <button id="btnDeleteConfig">🗑</button>
+          <button id="btnShareCode" title="Copy this battle as a shareable code">🔗 Code</button>
+          <button id="btnImportCode" title="Import a battle code">⬇ Import</button>
+        </div>
+        <select id="configList" size="4"></select>
+      </section>
+
+      <section class="panel" id="progressionBox">
+        <h3>Commander Profile <span id="profileLevel" class="badge"></span></h3>
+        <div id="xpBar"><div id="xpFill"></div></div>
+        <div id="masteryInfo" class="dim small"></div>
+        <button id="btnAchievements" class="small">Achievements</button>
+        <ul id="achList" class="hidden"></ul>
+      </section>
+    </aside>
+  </main>
+
+  <footer id="bottombar">
+    <span id="spentText"></span>
+    <div id="budgetBar"><div id="budgetFill"></div></div>
+    <div id="momentumWrap" title="Live battle momentum (remaining army strength)">
+      <span class="momLabel blue" id="momA">50%</span>
+      <div id="momentumBar"><div id="momentumA"></div></div>
+      <span class="momLabel red" id="momB">50%</span>
+    </div>
+    <span id="hint" class="dim"></span>
+    <span id="battleStatus" class="dim"></span>
+  </footer>
+
+  <!-- Battle Lab screen -->
+  <div id="labScreen" class="hidden">
+    <header id="labHeader">
+      <div id="logoSmall">UNIT<span>CLASH</span> <em>Battle Lab</em></div>
+      <input id="labName" placeholder="Experiment name" maxlength="60">
+      <button id="btnLabClose" class="primary">✕ Back to Sandbox</button>
+    </header>
+    <div id="labLayout">
+      <aside id="labHistory">
+        <h3>Experiment History</h3>
+        <button id="btnLabNew" class="wide primary">＋ New from Sandbox Setup</button>
+        <ul id="labHistoryList"></ul>
+      </aside>
+      <div id="labCenter">
+        <div id="labControls" class="row">
+          <label>Runs per config
+            <select id="labRuns">
+              <option>5</option><option selected>10</option><option>25</option><option>50</option>
+            </select>
+          </label>
+          <button id="btnLabRun" class="primary">⚗ Run Experiment</button>
+          <button id="btnLabFormations" title="Generate defensive / balanced / scattered formation variants of the baseline">⚔ Formation Variants</button>
+          <button id="btnLabSynergy" title="Auto-generate one add-a-unit variant per unit type at equal added budget">⚗ Synergy Scan</button>
+          <button id="btnLabMatrix" title="Headless 1v1 tournament: every unit vs every unit, seeded">⌗ Matchup Matrix</button>
+          <div id="labProgress"><div id="labProgressFill"></div></div>
+          <span id="labProgressText" class="dim"></span>
+        </div>
+        <div id="labConfigs"></div>
+        <h3>Results Comparison</h3>
+        <div id="labComparison"></div>
+        <div id="labMatrix"></div>
+      </div>
+      <aside id="labNotesBox">
+        <h3>Notes</h3>
+        <textarea id="labNotes" placeholder="What are you testing? What did you learn?"></textarea>
+        <div id="labInsights"></div>
+      </aside>
+    </div>
+  </div>
+
+  <div id="modal" class="hidden">
+    <div id="modalBox">
+      <h3 id="modalTitle"></h3>
+      <input id="modalInput" type="text">
+      <div class="row">
+        <button id="modalOk" class="primary">OK</button>
+        <button id="modalCancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="hidden"></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

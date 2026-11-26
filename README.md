@@ -13,12 +13,37 @@ mapping are required to run it.
 > enable **Game Settings → Security → "Enable Studio Access to API Services"**
 > to hit the DataStore from Studio playtests.
 
-### Option A — Rojo (fastest, recommended)
+### Option A — Download the built place file from GitHub (zero install)
 
-If you have Rojo installed: `rojo build -o Beastbound.rbxlx` using the included
-`default.project.json`, then open the generated place. Nothing to paste.
+Every push to `main` runs a GitHub Actions workflow (`.github/workflows/rojo-build.yml`)
+that compiles `default.project.json` into `build/Beastbound_TheGreatMigration.rbxlx` with
+Rojo and uploads it as a build artifact. To get it: open the repo on GitHub →
+**Actions** → the latest "Build Roblox place file" run → **Artifacts** →
+download `Beastbound_TheGreatMigration` → unzip → open the `.rbxlx` in Studio.
 
-### Option B — Manual paste into Studio (about 10 minutes)
+### Option B — One-paste GitHub loader (no Rojo, live from this repo)
+
+`tools/load_from_github.lua` rebuilds the whole script tree inside an open Studio place
+by fetching the latest `src/**` files from GitHub:
+
+1. Open any place in Studio and enable **Game Settings → Security → Allow HTTP Requests**.
+2. Copy the entire contents of `tools/load_from_github.lua` into the **Command Bar**
+   (View → Command Bar) and press Enter.
+3. Watch the Output window; when it prints `DONE — N scripts loaded`, press Play.
+
+It creates the same mapping as `default.project.json`: `src/shared` →
+`ReplicatedStorage.BeastboundShared`, `src/server` → `ServerScriptService`
+(`BeastboundBootstrap` as a Script, everything else as ModuleScripts under
+`BeastboundModules`), `src/client` → `StarterPlayerScripts` as LocalScripts.
+Re-running it refreshes scripts to the newest GitHub state.
+
+### Option C — Rojo live sync (fastest iteration)
+
+If you have Rojo installed: clone this repo, run `rojo serve default.project.json`,
+install the Rojo plugin in Studio and press **Connect** — edits to `src/` sync into
+Studio instantly. Or build once with `rojo build -o Beastbound.rbxlx`.
+
+### Option D — Manual paste into Studio (about 10 minutes)
 
 Create empty Folders/Instances first, then paste each script.
 
@@ -149,3 +174,17 @@ landmarks (Tail Spire, Hidden Garden, Lantern Crest — Atlas entries). Minutes
   denied server-side, no errors.
 - [ ] Mobile tap: gather prompts, build confirm, HUD readability on a phone layout.
 - [ ] Performance: ~6 clients, stable frame rate, creature animation smooth.
+
+## UNIT CLASH — Roblox edition (`unit-clash-roblox/`)
+
+A second, separate game: a server-authoritative Luau port of the UNIT CLASH battle
+sandbox (15 config-driven units, behavior-brain AI, abilities, auras, projectiles,
+devices, budgets, battle controls, results). See `unit-clash-roblox/README.md` and
+load it with `tools/load_uc_from_github.lua` in the Studio Command Bar. CI also
+builds `UnitClash.rbxlx` on every push.
+
+## UNIT CLASH — browser edition (`unit-clash/`)
+
+The original zero-dependency HTML5/Canvas version with the full Battle Lab
+(multi-run experiments, synergy scan, formation variants, history). See
+`unit-clash/README.md`. Note: this one runs in a browser, not Roblox.

@@ -1,0 +1,28 @@
+{
+  "name": "UnitClash",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "UCShared": {
+        "$path": "src/shared"
+      }
+    },
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "UCBootstrap": {
+        "$path": "src/server/UCBootstrap.server.lua"
+      },
+      "UCModules": {
+        "$path": "src/server/UCModules"
+      }
+    },
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        "$path": "src/client"
+      }
+    }
+  }
+}

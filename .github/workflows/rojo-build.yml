@@ -1,0 +1,57 @@
+name: Build Roblox place files
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "unit-clash-roblox/src/**"
+      - "default.project.json"
+      - "unit-clash-roblox/default.project.json"
+      - ".github/workflows/rojo-build.yml"
+  pull_request:
+    paths:
+      - "src/**"
+      - "unit-clash-roblox/src/**"
+      - "default.project.json"
+      - "unit-clash-roblox/default.project.json"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rojo
+        run: |
+          curl -sL "https://github.com/rojo-rbx/rojo/releases/download/v7.4.4/rojo-7.4.4-linux-x86_64.zip" -o /tmp/rojo.zip
+          unzip -o /tmp/rojo.zip -d /tmp/rojo-bin
+          sudo install /tmp/rojo-bin/rojo /usr/local/bin/rojo
+          rojo --version
+
+      - name: Build BEASTBOUND place file
+        run: rojo build default.project.json -o build/Beastbound_TheGreatMigration.rbxlx
+
+      - name: Build UNIT CLASH place file
+        run: rojo build unit-clash-roblox/default.project.json -o build/UnitClash.rbxlx
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Roblox-builds
+          path: build/*.rbxlx
+
+  sim-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Luau VM
+        run: |
+          curl -sL "https://github.com/luau-lang/luau/releases/latest/download/luau-ubuntu.zip" -o /tmp/luau.zip
+          unzip -o /tmp/luau.zip -d /tmp/luau-bin
+          sudo install /tmp/luau-bin/luau /usr/local/bin/luau
+
+      - name: Run headless simulation tests
+        run: tools/run_luau_sim_tests.sh
