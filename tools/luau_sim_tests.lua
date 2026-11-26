@@ -199,11 +199,32 @@ local upCore = makeBattle(11, "frozen", {
 upCore:runToEnd()
 check("upgraded + faction battle resolves", upCore.outcome ~= nil)
 
--- 8. Every arena resolves
+-- 8. Every arena resolves and respects obstacles
 for arenaId in pairs(UCConfig.ARENAS) do
 	local c = makeBattle(5, arenaId)
-	c:runToEnd()
+	local res = c:runToEnd()
 	check("arena " .. arenaId .. " battle resolves", c.outcome ~= nil)
+	check("arena " .. arenaId .. " does not stall (no cap)", c.outcome.reason ~= "cap", tostring(c.outcome.reason))
+	local clearOfObstacles = true
+	for _, u in ipairs(c.units) do
+		if u.alive then
+			for _, o in ipairs(c.obstacles or {}) do
+				if (u.x - o.x) ^ 2 + (u.z - o.z) ^ 2 < (o.r - 0.5) ^ 2 then
+					clearOfObstacles = false
+				end
+			end
+		end
+	end
+	check("arena " .. arenaId .. " survivors clear of obstacles", clearOfObstacles)
+end
+
+-- 8b. Shop catalog integrity (cosmetics only)
+for key, item in pairs(UCConfig.SHOP) do
+	check("shop item " .. key .. " has name and blurb", item.name ~= nil and item.blurb ~= nil)
+	check("shop item " .. key .. " has gamepassId", type(item.gamepassId) == "number")
+	if item.palette then
+		check("shop item " .. key .. " palette complete", item.palette.body ~= nil and item.palette.glyph ~= nil)
+	end
 end
 
 -- 9. Mode helpers

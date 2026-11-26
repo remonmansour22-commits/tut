@@ -108,9 +108,9 @@ UCConfig.UNITS = {
 		desc = "Places a pad that heals allies on it.",
 	},
 	colossus = {
-		name = "Colossus", category = "Experimental", cost = 320, hp = 900, speed = 6, radius = 3,
-		range = 12, damage = 40, cooldown = 2, brain = "titan", armor = 0.25, unlockLevel = 2,
-		ability = { name = "Seismic Slam", cooldown = 8, kind = "slam_aoe", radius = 20, damage = 25, knockback = 24 },
+		name = "Colossus", category = "Experimental", cost = 340, hp = 800, speed = 6, radius = 3,
+		range = 12, damage = 36, cooldown = 2, brain = "titan", armor = 0.25, unlockLevel = 2,
+		ability = { name = "Seismic Slam", cooldown = 8, kind = "slam_aoe", radius = 20, damage = 22, knockback = 24 },
 		color = Color3.fromRGB(110, 100, 130),
 		desc = "Siege engine with a damaging ground slam.",
 	},
@@ -190,12 +190,36 @@ UCConfig.FACTIONS = {
 }
 
 UCConfig.ARENAS = {
-	grassland = { name = "Grassland", ground = Color3.fromRGB(90, 140, 70), material = Enum.Material.Grass, modifiers = {} },
-	desert = { name = "Desert", ground = Color3.fromRGB(215, 185, 120), material = Enum.Material.Sand, modifiers = { wind = true } },
-	industrial = { name = "Industrial", ground = Color3.fromRGB(70, 75, 85), material = Enum.Material.DiamondPlate, modifiers = { heavyknock = true } },
-	frozen = { name = "Frozen", ground = Color3.fromRGB(170, 215, 235), material = Enum.Material.Ice, modifiers = { slippery = true } },
-	rooftop = { name = "Rooftop", ground = Color3.fromRGB(60, 60, 70), material = Enum.Material.Concrete, modifiers = { lowgravity = true } },
-	training = { name = "Training Grounds", ground = Color3.fromRGB(120, 120, 130), material = Enum.Material.Concrete, modifiers = {} },
+	grassland = { name = "Grassland", ground = Color3.fromRGB(90, 140, 70), material = Enum.Material.Grass, modifiers = {},
+		obstacles = { { x = 6, z = -14, r = 7 }, { x = -6, z = 14, r = 7 } } },
+	desert = { name = "Desert", ground = Color3.fromRGB(215, 185, 120), material = Enum.Material.Sand, modifiers = { wind = true },
+		obstacles = { { x = -18, z = 0, r = 8 }, { x = 18, z = 0, r = 8 }, { x = 0, z = 0, r = 5 } } },
+	industrial = { name = "Industrial", ground = Color3.fromRGB(70, 75, 85), material = Enum.Material.DiamondPlate, modifiers = { heavyknock = true },
+		obstacles = { { x = 0, z = -10, r = 9 }, { x = 0, z = 10, r = 9 } } },
+	frozen = { name = "Frozen", ground = Color3.fromRGB(170, 215, 235), material = Enum.Material.Ice, modifiers = { slippery = true },
+		obstacles = { { x = 0, z = 0, r = 10 } } },
+	rooftop = { name = "Rooftop", ground = Color3.fromRGB(60, 60, 70), material = Enum.Material.Concrete, modifiers = { lowgravity = true },
+		obstacles = { { x = -20, z = -12, r = 6 }, { x = -20, z = 12, r = 6 }, { x = 20, z = 0, r = 8 } } },
+	training = { name = "Training Grounds", ground = Color3.fromRGB(120, 120, 130), material = Enum.Material.Concrete, modifiers = {},
+		obstacles = {} },
+}
+
+-- Shop: cosmetics only. gamepassId 0 = not configured yet; set real IDs from Creator Hub.
+UCConfig.SHOP = {
+	gold = {
+		name = "Golden Legion", blurb = "Your units render in polished gold.",
+		gamepassId = 0,
+		palette = { body = Color3.fromRGB(212, 175, 55), glyph = Color3.fromRGB(255, 240, 180) },
+	},
+	void = {
+		name = "Void Corps", blurb = "Your units render in shadow-violet.",
+		gamepassId = 0,
+		palette = { body = Color3.fromRGB(30, 26, 48), glyph = Color3.fromRGB(185, 150, 255) },
+	},
+	supporter = {
+		name = "Supporter Star", blurb = "Gold star beside your name. Pure style.",
+		gamepassId = 0,
+	},
 }
 
 UCConfig.LEVEL_XP = 100

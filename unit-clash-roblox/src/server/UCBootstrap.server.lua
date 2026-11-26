@@ -4,6 +4,8 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local MarketplaceService = game:GetService("MarketplaceService")
 
 local UCConfig = require(ReplicatedStorage:WaitForChild("UCShared"):WaitForChild("UCConfig"))
 local UCShareCodec = require(ReplicatedStorage:WaitForChild("UCShared"):WaitForChild("UCShareCodec"))
@@ -60,6 +62,36 @@ local function profileFor(player)
 		profiles[player.UserId] = UCProgress.load(player)
 	end
 	return profiles[player.UserId]
+end
+
+local ownedCache = {}
+local function ownedPasses(player)
+	if ownedCache[player.UserId] then
+		return ownedCache[player.UserId]
+	end
+	local owned = {}
+	for key, item in pairs(UCConfig.SHOP) do
+		if item.gamepassId and item.gamepassId > 0 then
+			local ok, res = pcall(function()
+				return MarketplaceService:UserOwnsGamePassAsync(player.UserId, item.gamepassId)
+			end)
+			owned[key] = ok and res or false
+		end
+	end
+	ownedCache[player.UserId] = owned
+	return owned
+end
+
+local function ownedByPayload()
+	local ownedBy = {}
+	for _, pl in ipairs(Players:GetPlayers()) do
+		local o = ownedPasses(pl)
+		ownedBy[tostring(pl.UserId)] = {
+			skin = (o.void and "void") or (o.gold and "gold") or nil,
+			supporter = o.supporter or false,
+		}
+	end
+	return ownedBy
 end
 
 -- ---------- arena ----------
@@ -200,6 +232,7 @@ local function broadcastState()
 		momentum = momentum,
 		seed = session.seed,
 		staged = { A = session.staged.A, B = session.staged.B },
+		ownedBy = ownedByPayload(),
 	})
 end
 
@@ -303,6 +336,7 @@ local function startBattle()
 		return false, "Both teams need at least one unit"
 	end
 	local config = buildConfigFromStaged()
+	session.lastBattleConfig = config
 	local core = UCSimCore.new(config)
 	session.battle = { core = core, acc = 0, stateTimer = 0, snapTimer = 0, cinematicDone = false }
 	session.phase = "battle"
@@ -444,6 +478,11 @@ handlers.place = function(player, args)
 	if not inBounds(team, args.x, args.z) then
 		return toast(player, "Place inside the team's half")
 	end
+	for _, o in ipairs(UCConfig.ARENAS[session.arenaId].obstacles or {}) do
+		if math.sqrt((args.x - o.x) ^ 2 + (args.z - o.z) ^ 2) < o.r + 2 then
+			return toast(player, "Blocked by terrain")
+		end
+	end
 	table.insert(session.staged[team], { type = unitId, upgrade = args.upgrade, x = args.x, z = args.z })
 	broadcastState()
 end
@@ -540,6 +579,34 @@ handlers.start = function(player)
 	else
 		broadcastState()
 	end
+end
+
+handlers.replay = function(player)
+	if not session.lastBattleConfig then
+		return toast(player, "No battle to replay yet")
+	end
+	if session.phase == "battle" then
+		stopBattle()
+	end
+	loadStagedFromConfig(session.lastBattleConfig)
+	session.phase = "setup"
+	local ok, err = startBattle()
+	if not ok then
+		toast(player, tostring(err))
+	else
+		broadcastState()
+	end
+end
+
+handlers.buy = function(player, args)
+	local item = UCConfig.SHOP[args.key]
+	if not item then
+		return toast(player, "Unknown shop item")
+	end
+	if not item.gamepassId or item.gamepassId <= 0 then
+		return toast(player, "Shop item not configured yet (set gamepassId in UCConfig.SHOP)")
+	end
+	MarketplaceService:PromptGamePassPurchase(player, item.gamepassId)
 end
 
 handlers.pause = function(player)

@@ -7,6 +7,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 
@@ -36,10 +37,12 @@ local SFX_DEFS = {
 	victory = { id = "rbxasset://sounds/swordlunge.wav", vol = 0.5, pitch = { 0.55, 0.55 }, gap = 0.5 },
 	click = { id = "rbxasset://sounds/button.wav", vol = 0.35, pitch = { 0.95, 1.05 }, gap = 0.03 },
 	place = { id = "rbxasset://sounds/unsheath.wav", vol = 0.25, pitch = { 1.0, 1.25 }, gap = 0.05 },
+	boom = { id = "rbxasset://sounds/collide.wav", vol = 0.4, pitch = { 0.5, 0.7 }, gap = 0.1 },
+	obstacle = { id = "rbxasset://sounds/snap.mp3", vol = 0.15, pitch = { 0.6, 0.8 }, gap = 0.08 },
 }
 local SFX_FOR_EVENT = {
 	hit = "hit", shoot = "shoot", death = "death", ability = "ability",
-	rebirth = "ability", deviceDown = "impact",
+	rebirth = "ability", deviceDown = "impact", obstacle = "obstacle",
 }
 local sfxPool, sfxLast = {}, {}
 for i = 1, 12 do
@@ -49,6 +52,14 @@ for i = 1, 12 do
 	snd.Parent = SoundService
 	sfxPool[i] = snd
 end
+local ambience = Instance.new("Sound")
+ambience.Name = "UCAmbience"
+ambience.SoundId = "rbxasset://sounds/swoosh.wav"
+ambience.Looped = true
+ambience.Volume = 0.045
+ambience.PlaybackSpeed = 0.28
+ambience.Parent = SoundService
+
 local sfxNext = 0
 local function playSfx(kind)
 	local def = SFX_DEFS[kind]
@@ -221,6 +232,7 @@ local arenaNameTag = label({
 
 local layerStaged = mk("Frame", { Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, ZIndex = 3 }, field)
 local layerDevices = mk("Frame", { Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, ZIndex = 4 }, field)
+local layerObstacles = mk("Frame", { Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, ZIndex = 3 }, field)
 local layerUnits = mk("Frame", { Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, ZIndex = 5 }, field)
 local layerProj = mk("Frame", { Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, ZIndex = 6 }, field)
 local layerFx = mk("Frame", { Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, ZIndex = 7 }, field)
@@ -235,6 +247,27 @@ local function scaleToSim(fx, fy)
 	local x = (fx - X0) / (X1 - X0) * (UCConfig.ARENA.HALF * 2) - UCConfig.ARENA.HALF
 	local z = (fy - BAND_TOP) / (BAND_BOTTOM - BAND_TOP) * (UCConfig.ARENA.DEPTH * 2) - UCConfig.ARENA.DEPTH
 	return x, z
+end
+
+local function buildObstacles(arenaId)
+	for _, child in ipairs(layerObstacles:GetChildren()) do
+		child:Destroy()
+	end
+	local arena = UCConfig.ARENAS[arenaId] or UCConfig.ARENAS.grassland
+	local base = arena.ground or Color3.fromRGB(120, 120, 120)
+	for _, o in ipairs(arena.obstacles or {}) do
+		local fx, fz = simToScale(o.x, o.z)
+		local szx = (o.r * 2 / (UCConfig.ARENA.HALF * 2)) * (X1 - X0)
+		local szz = o.r * 2 / (UCConfig.ARENA.DEPTH * 2) * (BAND_BOTTOM - BAND_TOP) * 2
+		local rock = mk("Frame", {
+			Size = UDim2.fromScale(szx, szz), Position = UDim2.fromScale(fx, fz),
+			AnchorPoint = Vector2.new(0.5, 0.5), BackgroundColor3 = base,
+			BackgroundTransparency = 0.25, BorderSizePixel = 0, ZIndex = 3,
+		}, layerObstacles)
+		corner(rock, 999)
+		mk("UIStroke", { Color = Color3.fromRGB(20, 22, 30), Thickness = 2, Transparency = 0.35 }, rock)
+		mk("UIGradient", { Rotation = 60, Color = ColorSequence.new(Color3.fromRGB(255, 255, 255), Color3.fromRGB(70, 70, 80)) }, rock)
+	end
 end
 
 -- ============================================================
@@ -259,9 +292,16 @@ local CATEGORY_WIDTH = { Heavy = 1.28, Agile = 0.82, Ranged = 0.95, Support = 0.
 local function makeUnitVisual(id, def, team)
 	local sz = unitSize(def.radius or 1)
 	local szx = sz * (CATEGORY_WIDTH[def.category] or 1)
+	local bodyColor = def.color or Color3.fromRGB(200, 200, 200)
+	local glyphColor = Color3.fromRGB(255, 255, 255)
+	local skinItem = state.mySkin and UCConfig.SHOP[state.mySkin]
+	if skinItem and skinItem.palette and team == state.activeTeam then
+		bodyColor = skinItem.palette.body
+		glyphColor = skinItem.palette.glyph
+	end
 	local root = mk("Frame", {
 		Size = UDim2.fromScale(szx, sz), AnchorPoint = Vector2.new(0.5, 0.5),
-		BackgroundColor3 = def.color or Color3.fromRGB(200, 200, 200), BorderSizePixel = 0, ZIndex = 5,
+		BackgroundColor3 = bodyColor, BorderSizePixel = 0, ZIndex = 5,
 	}, layerUnits)
 	corner(root, 999)
 	mk("UIGradient", { Rotation = 60, Color = ColorSequence.new(Color3.fromRGB(255, 255, 255), Color3.fromRGB(140, 140, 150)) }, root)
@@ -279,7 +319,7 @@ local function makeUnitVisual(id, def, team)
 	local glyph = mk("TextLabel", {
 		Size = UDim2.fromScale(0.72, 0.72), Position = UDim2.fromScale(0.5, 0.5), AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundTransparency = 1, Text = CATEGORY_GLYPHS[def.category] or "",
-		TextColor3 = Color3.fromRGB(255, 255, 255), TextTransparency = 0.18,
+		TextColor3 = glyphColor, TextTransparency = 0.18,
 		Font = Enum.Font.GothamBold, TextScaled = true, ZIndex = 6,
 	}, root)
 	local barBg = mk("Frame", {
@@ -425,10 +465,63 @@ local function teamColorOf(team)
 	return UCConfig.TEAMS[team] and UCConfig.TEAMS[team].color or Color3.fromRGB(200, 200, 200)
 end
 
+local shardPool = {}
+local function spawnShards(x, z, color)
+	local live = 0
+	for _, sh in ipairs(shardPool) do
+		if sh.active then
+			live = live + 1
+		end
+	end
+	if live > 18 then
+		return
+	end
+	local fx, fz = simToScale(x, z)
+	for i = 1, 6 do
+		local entry
+		for _, sh in ipairs(shardPool) do
+			if not sh.active then
+				entry = sh
+				break
+			end
+		end
+		if not entry then
+			local frame = mk("Frame", {
+				AnchorPoint = Vector2.new(0.5, 0.5), BorderSizePixel = 0, ZIndex = 8, Visible = false,
+			}, layerFx)
+			corner(frame, 999)
+			entry = { frame = frame, active = false }
+			table.insert(shardPool, entry)
+		end
+		local ang = (i / 6) * 6.283 + math.random() * 0.8
+		local dist = 0.02 + math.random() * 0.025
+		entry.active = true
+		entry.frame.Visible = true
+		entry.frame.Size = UDim2.fromScale(0.006, 0.006)
+		entry.frame.Position = UDim2.fromScale(fx, fz)
+		entry.frame.BackgroundColor3 = color
+		entry.frame.BackgroundTransparency = 0.1
+		local goal = {
+			Position = UDim2.fromScale(fx + math.cos(ang) * dist, fz + math.sin(ang) * dist * 0.5),
+			BackgroundTransparency = 1,
+			Size = UDim2.fromScale(0.002, 0.002),
+		}
+		local tween = TweenService:Create(entry.frame, TweenInfo.new(0.38, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), goal)
+		tween.Completed:Connect(function()
+			entry.active = false
+			entry.frame.Visible = false
+		end)
+		tween:Play()
+	end
+end
+
 local FX_STYLES = {
 	hit = function(e) spawnPopup("-" .. math.max(1, math.floor(e[4] or 1)), THEME.red, e[2], e[3], false) end,
 	heal = function(e) spawnPopup("+" .. math.max(1, math.floor(e[4] or 1)), THEME.green, e[2], e[3], false) end,
-	death = function(e) spawnRing(teamColorOf(e[5]), e[2], e[3], 3, 0.5) end,
+	death = function(e)
+		spawnRing(teamColorOf(e[5]), e[2], e[3], 3, 0.5)
+		spawnShards(e[2], e[3], teamColorOf(e[5]))
+	end,
 	rebirth = function(e)
 		spawnPopup("REBIRTH!", Color3.fromRGB(255, 190, 90), e[2], e[3], true)
 		spawnRing(Color3.fromRGB(255, 150, 60), e[2], e[3], e[4] or 8, 0.6)
@@ -438,6 +531,7 @@ local FX_STYLES = {
 	deviceDown = function(e)
 		spawnPopup("DOWN", Color3.fromRGB(200, 200, 210), e[2], e[3], false)
 		spawnRing(Color3.fromRGB(255, 120, 90), e[2], e[3], 4, 0.5)
+		spawnShards(e[2], e[3], Color3.fromRGB(255, 150, 90))
 	end,
 	shoot = function(e) spawnRing(Color3.fromRGB(255, 255, 255), e[2], e[3], 1.2, 0.18) end,
 	despawn = function(e) spawnRing(Color3.fromRGB(120, 120, 130), e[2], e[3], 2, 0.3) end,
@@ -462,6 +556,7 @@ local function handleFx(fxList)
 			playSfx(sk)
 		end
 		if e[1] == "death" or e[1] == "deviceDown" then
+			playSfx("boom")
 			shake = math.min(0.014, shake + 0.006)
 		elseif e[1] == "rebirth" then
 			shake = math.min(0.02, shake + 0.01)
@@ -729,6 +824,10 @@ local btnClear = barButton("CLEAR", Color3.fromRGB(90, 70, 70), 4)
 local btnModes = barButton("MODES", Color3.fromRGB(80, 70, 110), 5)
 local btnMenu = barButton("MENU", Color3.fromRGB(60, 65, 90), 6)
 local btnLab = barButton("LAB", Color3.fromRGB(70, 75, 105), 7)
+local btnShop = barButton("SHOP", Color3.fromRGB(120, 95, 40), 8)
+
+local supporterTag = label({ Size = UDim2.new(0, 220, 0, 24), Position = UDim2.new(0, 12, 0.5, -12), Text = "", TextColor3 = THEME.gold, TextSize = 13, ZIndex = 11 }, topBar)
+supporterTag.Visible = false
 
 local SPEEDS = { 1, 2, 4, 0.5 }
 local speedIndex = 1
@@ -1030,11 +1129,40 @@ local banner = label({
 	BackgroundTransparency = 1, Visible = false, ZIndex = 30,
 }, gui)
 
+local shopPanel = panel({ Size = UDim2.new(0, 380, 0, 300), Position = UDim2.new(0.5, -190, 0.5, -150), BackgroundColor3 = THEME.panel, Visible = false, ZIndex = 25 }, gui)
+label({ Size = UDim2.new(1, 0, 0, 42), Text = "ARENA SHOP", TextColor3 = THEME.gold, Font = Enum.Font.GothamBlack, TextSize = 20, ZIndex = 26 }, shopPanel)
+label({ Size = UDim2.new(1, -20, 0, 26), Position = UDim2.new(0, 10, 0, 36), Text = "Cosmetics only - no gameplay advantages. Ever.", TextColor3 = Color3.fromRGB(160, 165, 180), TextSize = 11, ZIndex = 26 }, shopPanel)
+button("CLOSE", Color3.fromRGB(90, 70, 70), { Size = UDim2.new(0, 90, 0, 30), Position = UDim2.new(0.5, -45, 1, -38), ZIndex = 26 }, shopPanel).MouseButton1Click:Connect(function()
+	shopPanel.Visible = false
+end)
+for i, shopKey in ipairs({ "gold", "void", "supporter" }) do
+	local item = UCConfig.SHOP[shopKey]
+	if item then
+		local card = mk("Frame", {
+			Size = UDim2.new(1, -24, 0, 56), Position = UDim2.new(0, 12, 0, 66 + (i - 1) * 62),
+			BackgroundColor3 = THEME.panel2, BorderSizePixel = 0, ZIndex = 26,
+		}, shopPanel)
+		corner(card, 8)
+		label({ Size = UDim2.new(1, -110, 0, 22), Position = UDim2.new(0, 12, 0, 6), Text = item.name, TextColor3 = THEME.text, TextSize = 14, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 27 }, card)
+		label({ Size = UDim2.new(1, -110, 0, 22), Position = UDim2.new(0, 12, 0, 28), Text = item.blurb, TextColor3 = Color3.fromRGB(160, 165, 180), TextSize = 11, TextXAlignment = Enum.TextXAlignment.Left, ZIndex = 27 }, card)
+		button("BUY", Color3.fromRGB(70, 130, 60), { Size = UDim2.new(0, 74, 0, 34), Position = UDim2.new(1, -86, 0.5, -17), ZIndex = 27 }, card).MouseButton1Click:Connect(function()
+			act("buy", { key = shopKey })
+		end)
+	end
+end
+btnShop.MouseButton1Click:Connect(function()
+	shopPanel.Visible = not shopPanel.Visible
+end)
+
 local resultsPanel = panel({ Size = UDim2.new(0, 440, 0, 320), Position = UDim2.new(0.5, -220, 0.5, -160), BackgroundColor3 = THEME.panel, BackgroundTransparency = 0.01, Visible = false, ZIndex = 25 }, gui)
 local resultsTitle = label({ Size = UDim2.new(1, 0, 0, 40), Text = "", TextColor3 = THEME.gold, Font = Enum.Font.GothamBlack, TextSize = 22, ZIndex = 26 }, resultsPanel)
 local timelineFrame = mk("Frame", { Size = UDim2.new(1, -40, 0, 70), Position = UDim2.new(0, 20, 0, 44), BackgroundColor3 = Color3.fromRGB(12, 14, 20), ZIndex = 26 }, resultsPanel)
 local resultsBody = label({ Size = UDim2.new(1, -30, 1, -230), Position = UDim2.new(0, 15, 0, 120), Text = "", TextColor3 = Color3.fromRGB(210, 215, 230), TextSize = 12, TextWrapped = true, TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top, ZIndex = 26 }, resultsPanel)
-local btnAgain = button("NEW BATTLE", Color3.fromRGB(50, 160, 80), { Size = UDim2.new(0, 150, 0, 34), Position = UDim2.new(0.5, -75, 1, -44), ZIndex = 26 }, resultsPanel)
+local btnAgain = button("NEW BATTLE", Color3.fromRGB(50, 160, 80), { Size = UDim2.new(0, 150, 0, 34), Position = UDim2.new(0.5, 5, 1, -44), ZIndex = 26 }, resultsPanel)
+local btnReplay = button("REPLAY", Color3.fromRGB(60, 110, 160), { Size = UDim2.new(0, 150, 0, 34), Position = UDim2.new(0.5, -155, 1, -44), ZIndex = 26 }, resultsPanel)
+btnReplay.MouseButton1Click:Connect(function()
+	act("replay")
+end)
 btnAgain.MouseButton1Click:Connect(function()
 	resultsPanel.Visible = false
 	banner.Visible = false
@@ -1183,6 +1311,20 @@ evState.OnClientEvent:Connect(function(s)
 	arenaBtn.Text = "ARENA: " .. s.arenaName
 	ground.BackgroundColor3 = (UCConfig.ARENAS[s.arena] or UCConfig.ARENAS.grassland).ground
 	arenaNameTag.Text = string.upper(s.arenaName or "")
+	if s.arena ~= state.arena then
+		buildObstacles(s.arena)
+	end
+	local mine = s.ownedBy and s.ownedBy[tostring(player.UserId)]
+	state.mySkin = mine and mine.skin or nil
+	supporterTag.Visible = mine and mine.supporter or false
+	supporterTag.Text = mine and mine.supporter and ("\u{2605} " .. (player.DisplayName or "SUPPORTER")) or ""
+	if s.phase == "battle" then
+		if not ambience.IsPlaying then
+			ambience:Play()
+		end
+	else
+		ambience:Stop()
+	end
 
 	local factionText = {}
 	for team in pairs({ A = true, B = true }) do

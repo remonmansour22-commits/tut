@@ -63,6 +63,7 @@ function UCSimCore.new(config)
 	self.arenaId = config.arena or "grassland"
 	local arena = UCConfig.ARENAS[self.arenaId] or UCConfig.ARENAS.grassland
 	self.modifiers = mod(arena.modifiers)
+	self.obstacles = arena.obstacles or {}
 	if config.modifiers then
 		for m in pairs(config.modifiers) do
 			self.modifiers[m] = true
@@ -197,6 +198,19 @@ end
 function UCSimCore:clampPos(u)
 	u.x = math.clamp(u.x, -98, 98)
 	u.z = math.clamp(u.z, -28, 28)
+	for _, o in ipairs(self.obstacles) do
+		local dx, dz = u.x - o.x, u.z - o.z
+		local d = math.sqrt(dx * dx + dz * dz)
+		local min = o.r + (u.def.radius or 1)
+		if d < min then
+			if d < 0.01 then
+				u.x = math.clamp(u.x + min, -98, 98)
+			else
+				u.x = math.clamp(o.x + dx / d * min, -98, 98)
+				u.z = math.clamp(o.z + dz / d * min, -28, 28)
+			end
+		end
+	end
 end
 
 function UCSimCore:damage(attacker, target, amount, opts)
@@ -340,6 +354,15 @@ function UCSimCore:stepProjectiles(dt)
 							blocked = true
 							break
 						end
+					end
+				end
+			end
+			if not blocked then
+				for _, o in ipairs(self.obstacles) do
+					if (o.x - p.x) ^ 2 + (o.z - p.z) ^ 2 <= o.r * o.r then
+						blocked = true
+						self:emit({ type = "obstacle", x = p.x, z = p.z, r = 2 })
+						break
 					end
 				end
 			end
