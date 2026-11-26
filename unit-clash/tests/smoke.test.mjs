@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { BattleSim, WORLD } from '../js/sim.js';
 import { RNG } from '../js/rng.js';
 import { UNITS, resolveDef, UPGRADES } from '../js/units.js';
-import { unitCost, configCost, cloneConfig, deterministicSeed, BattleLab } from '../js/battlelab.js';
+import { unitCost, configCost, cloneConfig, deterministicSeed, BattleLab, duelWinner, duelConfig, matrixScores } from '../js/battlelab.js';
 import { aggregate, generateInsights } from '../js/stats.js';
 import { randomArmy, layoutArmy, dailyChallenge, generateEnemyFor, CAMPAIGN } from '../js/modes.js';
 import { FACTIONS } from '../js/factions.js';
@@ -372,4 +372,88 @@ test('share code round-trips a config exactly', async () => {
   assert.deepEqual(decoded, cfg, 'decode(encode(cfg)) must equal cfg');
   assert.equal(GameController.prototype.decodeConfig.call({}, 'UC1.nonsense!!!'), null);
   assert.equal(GameController.prototype.decodeConfig.call({}, 'garbage'), null);
+});
+
+// ---------------- v0.4 additions: destructible devices + matchup matrix ----------------
+
+test('devices are destructible: direct damage, AoE abilities, and projectiles all hurt them', () => {
+  const cfg = mirroredConfig(7);
+  cfg.teams.A.units = [{ type: 'brawler', x: 400, y: 450, upgrade: null }];
+  cfg.teams.B.units = [{ type: 'engineer', x: 1200, y: 450, upgrade: null }];
+  const sim = new BattleSim(cfg);
+  const eng = sim.units.find(u => u.def.id === 'engineer');
+  sim.abTurret(eng);
+  sim.abTurret(eng); // second call would exceed nest limit in real AI, but spawns directly here
+  const turrets = sim.devices.filter(d => d.kind === 'turret');
+  assert.ok(turrets.length >= 1, 'turret must exist');
+  const t = turrets[0];
+  assert.ok(t.uid, 'device must have a uid');
+  const hp0 = t.hp;
+
+  sim.damageDevice(sim.units[0], t, 25);
+  assert.equal(t.hp, hp0 - 25, 'direct device damage must apply');
+
+  sim.damageDevices(sim.units[0], t.x, t.y, 400, 30);
+  assert.equal(t.hp, hp0 - 55, 'AoE device damage must apply');
+
+  const totem = sim.devices.find(d => d.kind === 'totem');
+  assert.equal(totem, undefined, 'no totems in this scenario');
+
+  const destroyed = sim.devices.find(d => d.hp <= 0);
+  assert.equal(destroyed, undefined, 'turret still alive');
+  sim.damageDevice(sim.units[0], t, 9999);
+  assert.equal(t.hp, 0, 'turret hp floors at zero');
+  sim.step();
+  assert.ok(!sim.devices.includes(t), 'destroyed turret must be removed on the next step');
+});
+
+test('projectiles can destroy enemy devices (Engineer counterplay)', () => {
+  const cfg = mirroredConfig(11);
+  cfg.teams.A.units = [{ type: 'sparkcaster', x: 300, y: 450, upgrade: null }];
+  cfg.teams.B.units = [{ type: 'engineer', x: 700, y: 450, upgrade: null }];
+  const sim = new BattleSim(cfg);
+  const eng = sim.units.find(u => u.def.id === 'engineer');
+  sim.abTurret(eng);
+  const turret = sim.devices.find(d => d.kind === 'turret');
+  assert.ok(turret, 'turret must exist');
+  // Place a sparkcaster directly opposite the turret so its bolts fly at/past it.
+  const caster = sim.units.find(u => u.def.id === 'sparkcaster');
+  caster.x = turret.x - 180; caster.y = turret.y;
+  const hp0 = turret.hp;
+  let sawHit = false;
+  for (let i = 0; i < 30 * 20 && !sawHit; i++) {
+    sim.step();
+    if (sim.t > 1 && turret.hp < hp0) sawHit = true;
+  }
+  assert.ok(sawHit, 'enemy projectiles must damage the turret (was invincible before v0.4)');
+});
+
+test('matchup matrix duels are deterministic and well-formed', () => {
+  const a = duelWinner('scout', 'heavy', 0);
+  const b = duelWinner('scout', 'heavy', 0);
+  assert.equal(a, b, 'same duel + run index must replay identically');
+  assert.ok(['A', 'B', 'draw'].includes(a), 'winner must be a valid outcome');
+  const cfg = duelConfig('medic', 'colossus', 2);
+  assert.equal(cfg.teams.A.units.length, 1);
+  assert.equal(cfg.teams.B.units.length, 1);
+  assert.equal(cfg.arena, 'training');
+  const c = duelConfig('medic', 'colossus', 2);
+  assert.deepEqual(cfg, c, 'duel configs must be reproducible');
+});
+
+test('matrixScores ranks units in 0..1 with duel counts', () => {
+  const entries = {
+    'scout|heavy': { a: 'scout', b: 'heavy', winsA: 2, winsB: 4, draws: 0 },
+    'scout|medic': { a: 'scout', b: 'medic', winsA: 5, winsB: 1, draws: 0 },
+    'heavy|medic': { a: 'heavy', b: 'medic', winsA: 4, winsB: 2, draws: 0 }
+  };
+  const scores = matrixScores(entries);
+  assert.equal(scores.length, 3);
+  for (const s of scores) {
+    assert.ok(s.score >= 0 && s.score <= 1, 'score must be a rate');
+    assert.equal(s.duels, 2);
+  }
+  const byId = Object.fromEntries(scores.map(s => [s.id, s.score]));
+  assert.ok(byId.medic < byId.heavy, 'medic should lose duels to heavy');
+  assert.ok(byId.heavy > byId.scout, 'heavy (2/6 + 4/6) should outscore scout (2/6 + 5/6) on aggregate here');
 });

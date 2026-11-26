@@ -93,6 +93,9 @@ export class Unit {
   }
 }
 
+// ---------------- device ids (devices are destructible targets) ----------------
+let DEV_SEQ = 1;
+
 // ---------------- projectile ----------------
 function makeProjectile(sim, owner, opts) {
   const p = {
@@ -378,12 +381,29 @@ export class BattleSim {
     }
   }
 
+  // ---------- devices are destructible: no more uncounterable Engineer ----------
+  damageDevice(attacker, device, amount) {
+    if (!device || device.hp <= 0 || amount <= 0) return;
+    device.hp -= amount;
+    if (device.hp <= 0) device.hp = 0;
+    if (this.collectEvents) this.events.push({ type: 'deviceHit', x: device.x, y: device.y, color: device.def.color });
+  }
+
+  damageDevices(attacker, x, y, r, dmg) {
+    for (const d of this.devices) {
+      if (d.team === attacker.team || d.hp <= 0) continue;
+      if (Math.hypot(d.x - x, d.y - y) > r + (d.def.radius || 10)) continue;
+      this.damageDevice(attacker, d, dmg);
+    }
+  }
+
   abCleave(u) {
     const r = u.def.attack.range + 18;
     for (const t of enemiesWithin(this, u, r)) {
       this.damage(u, t, u.def.attack.damage * 1.5 * u.dmgMul(), { knockback: 110 });
       if (u.hasUpgrade('brawler_quake')) this.addStatus(t, 'slow', 1.5, 0.65);
     }
+    this.damageDevices(u, u.x, u.y, r, u.def.attack.damage);
     this.addEvent({ type: 'aoe', x: u.x, y: u.y, r, color: '#ffd97a' });
     this.shake += 0.25;
   }
@@ -405,6 +425,7 @@ export class BattleSim {
       this.damage(u, t, 34 * u.dmgMul(), { knockback: 320 });
       if (u.hasUpgrade('heavy_seismic')) this.addStatus(t, 'stun', 0.5, 1);
     }
+    this.damageDevices(u, u.x, u.y, r, 30);
     this.addEvent({ type: 'aoe', x: u.x, y: u.y, r, color: '#ff9c5f' });
     this.shake += 0.8;
   }
@@ -432,7 +453,7 @@ export class BattleSim {
     const life = 20 * (u.def.deviceLifeMul || 1);
     const rate = 0.8 / (u.def.deviceRateMul || 1);
     this.devices.push({
-      kind: 'turret', team: u.team, owner: u, x: u.x - u.facing * 20, y: u.y,
+      kind: 'turret', uid: 'd' + (DEV_SEQ++), team: u.team, owner: u, x: u.x - u.facing * 20, y: u.y,
       hp: 70, maxHp: 70, life, cd: 0.5, rate, dmg: 12,
       boosted: u.hasUpgrade('engineer_upgradeturret'),
       def: { id: 'turret', name: 'Turret', category: 'device', radius: 10, color: '#f0a35e' }
@@ -473,7 +494,7 @@ export class BattleSim {
   abTotem(u) {
     const life = 12 * (u.def.deviceLifeMul || 1);
     this.devices.push({
-      kind: 'totem', team: u.team, owner: u,
+      kind: 'totem', uid: 'd' + (DEV_SEQ++), team: u.team, owner: u,
       x: clamp(u.x, 40, this.W - 40), y: clamp(u.y, 40, this.H - 40),
       hp: 60, maxHp: 60, life, healRate: 9 * (u.def.healingMul || 1),
       radius: 110, speedAura: u.hasUpgrade('artificer_grove'),
@@ -485,6 +506,7 @@ export class BattleSim {
     for (const t of enemiesWithin(this, u, 130)) {
       this.damage(u, t, 55 * u.dmgMul(), { knockback: 420 });
     }
+    this.damageDevices(u, u.x, u.y, 130, 55);
     if (u.hasUpgrade('colossus_meteor')) {
       const es = this.enemiesOf(u).filter(e => e.alive).slice(0, 5);
       for (const e of es) {
@@ -503,6 +525,7 @@ export class BattleSim {
     for (const e of enemiesWithin(this, u, 130)) {
       this.damage(u, e, 22 * u.dmgMul(), { knockback: 90 });
     }
+    this.damageDevices(u, u.x, u.y, 130, 22);
     this.addStatus(u, 'haste', 2.5, 1.4);
     this.addEvent({ type: 'aoe', x: u.x, y: u.y, r: 130, color: '#ff9d5c' });
     this.shake += 0.4;
@@ -616,6 +639,7 @@ export class BattleSim {
       this.damage(target, e, rb.novaDamage, { knockback: rb.novaKnockback });
       if (bigger) this.addStatus(e, 'slow', 2, 0.6, target);
     }
+    this.damageDevices(target, target.x, target.y, radius, rb.novaDamage);
     this.addEvent({ type: 'rebirth', x: target.x, y: target.y, r: radius, color: '#ff9d5c' });
     this.shake += 0.8;
     return true;
@@ -687,6 +711,16 @@ export class BattleSim {
           consumed = true;
         }
         if (consumed) break;
+      }
+      if (!consumed && p.type !== 'leash') {
+        for (const d of this.devices) {
+          if (d.team === p.team || d.hp <= 0 || p.hitSet.has(d.uid)) continue;
+          if (Math.hypot(d.x - p.x, d.y - p.y) > (d.def.radius || 10) + p.radius) continue;
+          p.hitSet.add(d.uid);
+          this.damageDevice(p.owner, d, p.dmg);
+          consumed = true;
+          break;
+        }
       }
       if (consumed) this.projectiles.splice(i, 1);
     }

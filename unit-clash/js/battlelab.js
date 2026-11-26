@@ -9,7 +9,7 @@ import { aggregate, generateInsights } from './stats.js';
 import { SaveService } from './save.js';
 import { UNITS } from './units.js';
 import { layoutArmy } from './modes.js';
-import { RNG } from './rng.js';
+import { RNG, hashSeed } from './rng.js';
 
 let EXP_SEQ = 1;
 let CFG_SEQ = 1;
@@ -23,6 +23,45 @@ export function cloneConfig(config) { return JSON.parse(JSON.stringify(config));
 export function deterministicSeed(cfg, runIndex) {
   const base = typeof cfg.seed === 'number' ? cfg.seed : 12345;
   return (base + runIndex * 7919) >>> 0;
+}
+
+// ---- Matchup Matrix: deterministic headless 1v1 round-robin ----
+export function duelConfig(idA, idB, runIndex) {
+  const y = WORLD.H / 2 + ((runIndex % 3) - 1) * 90;
+  return {
+    arena: 'training', modifiers: [], timeLimit: 45,
+    seed: (hashSeed(idA + '|' + idB) + runIndex * 7919) >>> 0,
+    collectEvents: false,
+    teams: {
+      A: { units: [{ type: idA, x: WORLD.W * 0.3, y, upgrade: null }] },
+      B: { units: [{ type: idB, x: WORLD.W * 0.7, y, upgrade: null }] }
+    }
+  };
+}
+
+export function duelWinner(idA, idB, runIndex) {
+  const sim = new BattleSim(duelConfig(idA, idB, runIndex));
+  sim.runToEnd();
+  return sim.outcome.winner;
+}
+
+// Per-unit overall 1v1 strength from a completed matrix (0..1 average win rate).
+export function matrixScores(entries) {
+  const tally = new Map();
+  for (const e of Object.values(entries)) {
+    const n = e.winsA + e.winsB + e.draws || 1;
+    const wa = (e.winsA + e.draws * 0.5) / n;
+    const wb = (e.winsB + e.draws * 0.5) / n;
+    tally.set(e.a, (tally.get(e.a) || []).concat(wa));
+    tally.set(e.b, (tally.get(e.b) || []).concat(wb));
+  }
+  return [...tally.entries()]
+    .map(([id, rates]) => ({
+      id, name: UNITS[id] ? UNITS[id].name : id,
+      score: rates.reduce((s, r) => s + r, 0) / rates.length,
+      duels: rates.length
+    }))
+    .sort((x, y) => y.score - x.score);
 }
 
 export function configCost(config) {
@@ -39,6 +78,8 @@ export class BattleLab {
     this.experiment = null;
     this.running = false;
     this.progress = { done: 0, total: 0 };
+    this.matrix = null;
+    this.matrixRunning = false;
   }
 
   newExperiment(baseConfig, name = 'Untitled Experiment') {
@@ -198,6 +239,46 @@ export class BattleLab {
         self.running = false;
         self.persist();
         if (onDone) onDone();
+      }
+    }
+    setTimeout(chunk, 0);
+    return true;
+  }
+
+  // Matchup Matrix: headless 1v1 round-robin. Chunked like runAll so the
+  // browser stays responsive. Optional opts.ids limits the roster (tests).
+  runMatrix(runsPerPair, opts = {}, onProgress, onDone) {
+    if (this.matrixRunning) return false;
+    const ids = opts.ids || Object.keys(UNITS);
+    const runs = Math.max(1, Math.min(20, runsPerPair | 0 || 6));
+    const pairs = [];
+    for (let i = 0; i < ids.length; i++) {
+      for (let j = i + 1; j < ids.length; j++) pairs.push([ids[i], ids[j]]);
+    }
+    if (!pairs.length) return false;
+    this.matrixRunning = true;
+    const entries = {};
+    const self = this;
+    let pi = 0, ri = 0;
+
+    function chunk() {
+      const start = performance.now();
+      while (pi < pairs.length && performance.now() - start < 30) {
+        const [a, b] = pairs[pi];
+        const w = duelWinner(a, b, ri);
+        const key = a + '|' + b;
+        const e = entries[key] || (entries[key] = { a, b, winsA: 0, winsB: 0, draws: 0 });
+        if (w === 'A') e.winsA++; else if (w === 'B') e.winsB++; else e.draws++;
+        ri++;
+        if (ri >= runs) { ri = 0; pi++; }
+      }
+      if (onProgress) onProgress({ done: pi, total: pairs.length, runs });
+      if (pi < pairs.length) {
+        setTimeout(chunk, 0);
+      } else {
+        self.matrixRunning = false;
+        self.matrix = { runs, entries, computedAt: Date.now(), ids };
+        if (onDone) onDone(self.matrix);
       }
     }
     setTimeout(chunk, 0);

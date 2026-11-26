@@ -74,6 +74,18 @@ Known remaining texture (time-boxed, documented not hidden):
 
 ## Backlog
 
+- **Device counterplay depth** — turrets/totems are now destructible (v0.4). Next step:
+  AI explicitly targets enemy devices when they dominate an area, and Engineer gains an
+  upgrade to repair/relocate turrets. Complexity: M. Status: partially done.
+- **Device statistics in reports** — track damage/healing dealt by turrets and totems in
+  StatsTracker so insights can credit "your turret dealt 340 damage" and Lab comparisons
+  include device value. Complexity: S. Status: backlog.
+- **Mid-battle dynamic events** — announced hazards (meteor, supply drop, sudden freeze)
+  at seeded times. Benefit: battles gain an arc; Lab seeds make them reproducible.
+  Complexity: M. Status: backlog.
+- **Battle "story moments"** — auto-generated highlight reel: biggest single hit, longest
+  survive-at-1-HP, biggest nova. Benefit: memorable moments, shareable. Complexity: M.
+  Dependencies: event stream (done). Status: backlog.
 - **Obstacles & line-of-sight** — cover blocks on some arenas; projectiles check LOS.
   Benefit: positioning gains a new dimension; Sniper Alley becomes literal. Complexity: L.
   Dependencies: sim collision layer, arena props. Priority: HIGH. Status: backlog.
@@ -83,7 +95,8 @@ Known remaining texture (time-boxed, documented not hidden):
 - **Unit-versus-unit tournament brackets** — auto-run 1v1/3v3 round robins in the Lab,
   rank all units with context (arena, budget). Benefit: makes cost/value visible;
   great "research" content. Complexity: M. Dependencies: battlelab.runAll (done).
-  Priority: MEDIUM. Status: backlog.
+  Priority: MEDIUM. Status: **DONE v0.4** — Matchup Matrix (headless 1v1 round-robin,
+  color-coded heatmap + ranking) in the Lab; 3v3 brackets remain open.
 - **Unit performance heatmaps** — per-unit damage/survival heat overlay aggregated over
   lab runs. Benefit: visualize where armies win and die. Complexity: M. Dependencies:
   sim position tracking at death. Priority: MEDIUM. Status: backlog.

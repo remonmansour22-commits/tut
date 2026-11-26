@@ -292,6 +292,27 @@ function UCSimCore:fireProjectile(shooter, target, damage)
 	})
 end
 
+function UCSimCore:damageDevice(attacker, device, amount)
+	if not device or device.hp <= 0 or amount <= 0 then
+		return
+	end
+	device.hp = math.max(0, device.hp - amount)
+	if device.hp <= 0 then
+		self:emit({ type = "deviceDown", x = device.x, z = device.z })
+	end
+end
+
+function UCSimCore:damageDevices(attacker, x, z, r, dmg)
+	for _, d in ipairs(self.devices) do
+		if d.team ~= attacker.team and d.hp > 0 then
+			local dd = math.sqrt((d.x - x) ^ 2 + (d.z - z) ^ 2)
+			if dd <= r + 2 then
+				self:damageDevice(attacker, d, dmg)
+			end
+		end
+	end
+end
+
 function UCSimCore:stepProjectiles(dt)
 	for i = #self.projectiles, 1, -1 do
 		local p = self.projectiles[i]
@@ -306,7 +327,22 @@ function UCSimCore:stepProjectiles(dt)
 				p.x = p.x + math.cos(self.t * 2) * 4 * dt
 				p.z = p.z + math.sin(self.t * 3) * 4 * dt
 			end
-			if dist <= step + tgt.def.radius then
+			local blocked = false
+			if p.shooter then
+				for _, d in ipairs(self.devices) do
+					if d.team ~= p.shooter.team and d.hp > 0 then
+						local dd = math.sqrt((d.x - p.x) ^ 2 + (d.z - p.z) ^ 2)
+						if dd <= step + 2 then
+							self:damageDevice(p.shooter, d, p.damage)
+							blocked = true
+							break
+						end
+					end
+				end
+			end
+			if blocked then
+				table.remove(self.projectiles, i)
+			elseif dist <= step + tgt.def.radius then
 				self:damage(p.shooter, tgt, p.damage, { fx = p.x, fz = p.z })
 				table.remove(self.projectiles, i)
 			else
@@ -360,6 +396,7 @@ function UCSimCore:castAbility(u, target)
 					end
 				end
 			end
+			self:damageDevices(u, u.x, u.z, ab.radius, ab.damage)
 		else
 			u.abilityCd = 1
 		end
@@ -368,7 +405,7 @@ function UCSimCore:castAbility(u, target)
 		if enemy and math.sqrt((enemy.x - u.x) ^ 2 + (enemy.z - u.z) ^ 2) <= u.def.range + 15 then
 			table.insert(self.devices, {
 				kind = "turret", team = u.team, x = u.x, z = u.z,
-				hp = ab.hp, damage = ab.damage, range = ab.range,
+				hp = ab.hp, maxHp = ab.hp, damage = ab.damage, range = ab.range,
 				cooldown = ab.cooldown2, cd = 0, expires = self.t + ab.lifetime,
 			})
 			self:emit({ type = "turret", x = u.x, z = u.z, team = u.team })
@@ -380,6 +417,7 @@ function UCSimCore:castAbility(u, target)
 		if ally then
 			table.insert(self.devices, {
 				kind = "pad", team = u.team, x = ally.x, z = ally.z,
+				hp = ab.padHp or 50, maxHp = ab.padHp or 50,
 				heal = ab.heal, radius = ab.radius, expires = self.t + ab.lifetime, tickTimer = 0,
 			})
 			self:emit({ type = "pad", x = ally.x, z = ally.z, r = ab.radius })
@@ -607,7 +645,7 @@ end
 function UCSimCore:stepDevices(dt)
 	for i = #self.devices, 1, -1 do
 		local d = self.devices[i]
-		if self.t >= d.expires then
+		if self.t >= d.expires or d.hp <= 0 then
 			if d.modelEvent then
 				self:emit({ type = "despawn", x = d.x, z = d.z })
 			end

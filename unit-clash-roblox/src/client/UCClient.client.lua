@@ -335,7 +335,7 @@ local momB = mk("Frame", { Size = UDim2.new(0.5, 0, 1, 0), Position = UDim2.new(
 
 -- ---------- Battle Lab panel ----------
 
-local labPanel = panel({ Size = UDim2.new(0, 340, 0, 300), Position = UDim2.new(0.5, -170, 0.5, -150), BackgroundColor3 = Color3.fromRGB(18, 20, 28), BackgroundTransparency = 0.05, Visible = false, ZIndex = 15 }, gui)
+local labPanel = panel({ Size = UDim2.new(0, 340, 0, 340), Position = UDim2.new(0.5, -170, 0.5, -150), BackgroundColor3 = Color3.fromRGB(18, 20, 28), BackgroundTransparency = 0.05, Visible = false, ZIndex = 15 }, gui)
 label({ Size = UDim2.new(1, 0, 0, 36), Text = "BATTLE LAB", TextColor3 = Color3.fromRGB(255, 210, 90), Font = Enum.Font.GothamBlack, TextSize = 18, ZIndex = 16 }, labPanel)
 
 local btnLabBase = button("1. SAVE CURRENT AS BASELINE", Color3.fromRGB(45, 52, 76), { Size = UDim2.new(1, -20, 0, 30), Position = UDim2.new(0, 10, 0, 40), ZIndex = 16 }, labPanel)
@@ -343,7 +343,8 @@ local btnLabRun = button("2. RUN BASELINE x10", Color3.fromRGB(45, 52, 76), { Si
 local btnLabSyn = button("3. SYNERGY SCAN (+200 of each unit)", Color3.fromRGB(45, 52, 76), { Size = UDim2.new(1, -20, 0, 30), Position = UDim2.new(0, 10, 0, 112), ZIndex = 16 }, labPanel)
 local btnLabForm = button("4. FORMATION VARIANTS", Color3.fromRGB(45, 52, 76), { Size = UDim2.new(1, -20, 0, 30), Position = UDim2.new(0, 10, 0, 148), ZIndex = 16 }, labPanel)
 local btnLabHist = button("5. EXPERIMENT HISTORY", Color3.fromRGB(45, 52, 76), { Size = UDim2.new(1, -20, 0, 30), Position = UDim2.new(0, 10, 0, 184), ZIndex = 16 }, labPanel)
-local labStatus = label({ Size = UDim2.new(1, -20, 0, 60), Position = UDim2.new(0, 10, 0, 220), Text = "Save a baseline, then run experiments. Results are statistics over seeded runs - a few runs prove nothing absolute.", TextColor3 = Color3.fromRGB(150, 155, 170), TextSize = 10, TextWrapped = true, ZIndex = 16 }, labPanel)
+local btnLabMatrix = button("6. MATCHUP MATRIX (1v1 tournament)", Color3.fromRGB(45, 52, 76), { Size = UDim2.new(1, -20, 0, 30), Position = UDim2.new(0, 10, 0, 220), ZIndex = 16 }, labPanel)
+local labStatus = label({ Size = UDim2.new(1, -20, 0, 70), Position = UDim2.new(0, 10, 0, 256), Text = "Save a baseline, then run experiments. Results are statistics over seeded runs - a few runs prove nothing absolute.", TextColor3 = Color3.fromRGB(150, 155, 170), TextSize = 10, TextWrapped = true, ZIndex = 16 }, labPanel)
 local btnLabClose = button("CLOSE", Color3.fromRGB(90, 70, 70), { Size = UDim2.new(0, 80, 0, 26), Position = UDim2.new(1, -90, 0, 4), ZIndex = 16 }, labPanel)
 
 btnLabClose.MouseButton1Click:Connect(function() labPanel.Visible = false end)
@@ -352,6 +353,7 @@ btnLabRun.MouseButton1Click:Connect(function() act("labRun", { runs = 10 }) end)
 btnLabSyn.MouseButton1Click:Connect(function() act("labSynergy", {}) end)
 btnLabForm.MouseButton1Click:Connect(function() act("labFormations", {}) end)
 btnLabHist.MouseButton1Click:Connect(function() act("labHistory", { op = "list" }) end)
+btnLabMatrix.MouseButton1Click:Connect(function() act("labMatrix", { runs = 4 }) end)
 
 local resultsPanel = panel({ Size = UDim2.new(0, 440, 0, 320), Position = UDim2.new(0.5, -220, 0.5, -160), BackgroundColor3 = Color3.fromRGB(18, 20, 28), BackgroundTransparency = 0.03, Visible = false, ZIndex = 25 }, gui)
 local resultsTitle = label({ Size = UDim2.new(1, 0, 0, 40), Text = "", TextColor3 = Color3.fromRGB(255, 210, 90), Font = Enum.Font.GothamBlack, TextSize = 22, ZIndex = 26 }, resultsPanel)
@@ -421,6 +423,25 @@ evLab.OnClientEvent:Connect(function(payload)
 				break
 			end
 		end
+	elseif payload.stage == "matrixProgress" then
+		labPanel.Visible = true
+		if payload.total and payload.total > 0 then
+			labStatus.Text = string.format("Matchup Matrix - duel %d/%d (%d runs each)...", payload.done, payload.total, payload.runs)
+		else
+			labStatus.Text = "Matchup Matrix - starting 1v1 round-robin..."
+		end
+	elseif payload.stage == "matrixDone" then
+		labPanel.Visible = true
+		labStatus.Text = string.format("MATCHUP MATRIX done (%d runs per duel). Top 1v1:", payload.runs)
+		local shown = 0
+		for _, sc in ipairs(payload.scores) do
+			shown = shown + 1
+			labStatus.Text = labStatus.Text .. string.format("\n%d. %s - %d%% avg win rate", shown, sc.name, sc.score)
+			if shown >= 5 or #labStatus.Text > 700 then
+				break
+			end
+		end
+		labStatus.Text = labStatus.Text .. "\n1v1 strength is not army value - supports score low here."
 	elseif payload.stage == "history" then
 		labStatus.Text = "Saved experiments: "
 		for _, entry in ipairs(payload.history) do

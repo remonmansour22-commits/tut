@@ -657,6 +657,23 @@ handlers.labFormations = function(player)
 	labRunAll(variants, 8, "Formation Variants (8 runs each)")
 end
 
+local matrixBusy = false
+handlers.labMatrix = function(player, args)
+	if matrixBusy then
+		return toast(player, "A matchup matrix run is already in progress")
+	end
+	local runs = math.clamp(args and args.runs or 4, 1, 10)
+	matrixBusy = true
+	task.spawn(function()
+		evLab:FireAllClients({ stage = "matrixProgress", done = 0, total = 0, runs = runs })
+		local matrix = lab:matchupMatrix(runs, function(done, total)
+			evLab:FireAllClients({ stage = "matrixProgress", done = done, total = total, runs = runs })
+		end)
+		matrixBusy = false
+		evLab:FireAllClients({ stage = "matrixDone", runs = matrix.runs, results = matrix.results, scores = UCLab.matrixScores(matrix) })
+	end)
+end
+
 handlers.labHistory = function(player, args)
 	if args.op == "save" then
 		if not args.name then

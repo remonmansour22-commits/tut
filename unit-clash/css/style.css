@@ -219,6 +219,12 @@ textarea { width: 100%; height: 110px; resize: vertical; }
 #labComparison table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
 #labComparison th, #labComparison td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; }
 #labComparison th { color: var(--dim); font-weight: 600; text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.5px; }
+
+#labMatrix { margin-top: 14px; }
+#labMatrix table { border-collapse: collapse; font-size: 10.5px; }
+#labMatrix th, #labMatrix td { padding: 2px 5px; border: 1px solid var(--line); }
+#labMatrix th { color: var(--dim); font-weight: 600; font-size: 9.5px; }
+.mCell { text-align: center; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.6); min-width: 26px; cursor: default; }
 .cmpBar { height: 10px; background: #0d1119; border-radius: 3px; overflow: hidden; min-width: 80px; }
 .cmpBar > div { height: 100%; background: var(--accent); }
 

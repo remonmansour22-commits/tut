@@ -12,7 +12,7 @@ import { ARENAS, MODIFIER_INFO } from './arenas.js';
 import { generateInsights } from './stats.js';
 import { SaveService } from './save.js';
 import { ProgressionService, ACHIEVEMENTS } from './progression.js';
-import { BattleLab, cloneConfig, unitCost, configCost } from './battlelab.js';
+import { BattleLab, cloneConfig, unitCost, configCost, matrixScores } from './battlelab.js';
 import { CAMPAIGN, dailyChallenge, randomArmy, layoutArmy, generateEnemyFor } from './modes.js';
 import { RNG } from './rng.js';
 
@@ -327,6 +327,23 @@ export class GameController {
       const n = this.lab.synergyScan();
       this.renderLab();
       this.toast(n ? n + ' synergy variants created \u2014 run the experiment to compare.' : 'Synergy variants already present (or baseline is empty).');
+    };
+    $('btnLabMatrix').onclick = () => {
+      if (this.lab.matrixRunning) { this.toast('A matrix run is already in progress.'); return; }
+      const ok = this.lab.runMatrix(6, {},
+        p => {
+          $('labProgressFill').style.width = (p.total ? (p.done / p.total * 100) : 0) + '%';
+          $('labProgressText').textContent = 'Matchups ' + p.done + '/' + p.total + ' (' + p.runs + ' runs each)';
+        },
+        m => {
+          $('labProgressText').textContent = 'Matrix done \u2713';
+          this.renderMatrix(m);
+          this.addXP(15);
+          this.updateProgressionUI();
+          this.toast('Matchup Matrix complete \u2014 green means the row unit wins that duel.');
+        }
+      );
+      if (ok) this.toast('Running the 1v1 Matchup Matrix \u2014 every unit versus every other, seeded and reproducible.');
     };
     $('btnLabClose').onclick = () => {
       this.labEditing = null;
@@ -1248,6 +1265,41 @@ export class GameController {
     }
 
     this.renderLabHistory();
+  }
+
+  renderMatrix(m) {
+    const el = $('labMatrix');
+    if (!el) return;
+    const ids = m.ids;
+    const lookup = key => m.entries[key];
+    const cellRate = (a, b) => {
+      if (a === b) return null;
+      const e = lookup(a + '|' + b) || lookup(b + '|' + a);
+      if (!e) return null;
+      const n = e.winsA + e.winsB + e.draws || 1;
+      return e.a === a ? (e.winsA + e.draws * 0.5) / n : (e.winsB + e.draws * 0.5) / n;
+    };
+    const head = '<tr><th></th>' + ids.map(id => '<th title="' + UNITS[id].name + '">' + UNITS[id].name.slice(0, 4) + '</th>').join('') + '<th>Score</th></tr>';
+    const scores = new Map(matrixScores(m.entries).map(s => [s.id, s]));
+    const rows = ids.map(rowId => {
+      const cells = ids.map(colId => {
+        const r = cellRate(rowId, colId);
+        if (r === null) return '<td class="mCell" style="background:transparent"></td>';
+        const g = Math.round(120 + r * 100), rb = Math.round(210 - r * 150);
+        return '<td class="mCell" style="background:rgba(' + rb + ',' + g + ',90,0.45)" title="' +
+          UNITS[rowId].name + ' vs ' + UNITS[colId].name + ': ' + Math.round(r * 100) + '%">' + Math.round(r * 100) + '</td>';
+      }).join('');
+      const s = scores.get(rowId);
+      return '<tr><th style="text-align:left">' + UNITS[rowId].name + '</th>' + cells +
+        '<td><b>' + Math.round(s.score * 100) + '</b></td></tr>';
+    }).join('');
+    const ranking = matrixScores(m.entries).slice(0, 5).map((s, i) =>
+      (i + 1) + '. ' + s.name + ' \u2014 ' + Math.round(s.score * 100) + '% avg win rate').join(' \u00b7 ');
+    el.innerHTML =
+      '<h3 style="font-size:12px;color:var(--dim)">MATCHUP MATRIX \u2014 1v1 DUEL WIN RATES (' + m.runs + ' runs each, Training Grounds)</h3>' +
+      '<div style="overflow-x:auto"><table>' + head + rows + '</table></div>' +
+      '<div class="small" style="margin-top:6px"><b>Overall 1v1 ranking:</b> ' + ranking + '</div>' +
+      '<div class="dim small">1v1 strength \u2260 army value \u2014 support units score low here but win real battles. Use this to find hard counters, not to pick a "best unit".</div>';
   }
 
   compSummary(units) {

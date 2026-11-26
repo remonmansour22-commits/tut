@@ -193,6 +193,73 @@ function UCLab:insights(res)
 	return out
 end
 
+-- ---------- matchup matrix ----------
+-- Headless 1v1 round-robin: every unit vs every unit, seeded and reproducible.
+-- Yields between runs (call from task.spawn); onProgress(done, total, runs).
+function UCLab:matchupMatrix(runsPerPair, onProgress)
+	local runs = math.clamp(runsPerPair or 4, 1, 10)
+	local ids = UCConfig.ORDER
+	local pairsList = {}
+	for i = 1, #ids do
+		for j = i + 1, #ids do
+			table.insert(pairsList, { ids[i], ids[j] })
+		end
+	end
+	local results = {}
+	for pi, pair in ipairs(pairsList) do
+		local a, b = pair[1], pair[2]
+		local winsA, winsB, draws = 0, 0, 0
+		for i = 1, runs do
+			local laneZ = ((i - 1) % 3 - 1) * 14
+			local config = {
+				arena = "training", timeLimit = 40, seed = 1000,
+				teams = {
+					A = { { type = a, x = -55, z = laneZ } },
+					B = { { type = b, x = 55, z = laneZ } },
+				},
+			}
+			local seed = UCRng.hashSeed(a .. "|" .. b) + i * 7919
+			local r = UCLab.runner(config, seed)
+			while not r:chunk(0.03) do
+				task.wait()
+			end
+			local w = r.core.outcome and r.core.outcome.winner
+			if w == "A" then
+				winsA = winsA + 1
+			elseif w == "B" then
+				winsB = winsB + 1
+			else
+				draws = draws + 1
+			end
+		end
+		table.insert(results, { a = a, b = b, winsA = winsA, winsB = winsB, draws = draws })
+		if onProgress then
+			onProgress(pi, #pairsList, runs)
+		end
+	end
+	return { runs = runs, results = results }
+end
+
+-- Overall 1v1 ranking from a finished matrix (0..100 avg win rate).
+function UCLab.matrixScores(matrix)
+	local tally, duels = {}, {}
+	for _, e in ipairs(matrix.results) do
+		local n = e.winsA + e.winsB + e.draws
+		if n > 0 then
+			tally[e.a] = (tally[e.a] or 0) + (e.winsA + e.draws * 0.5) / n
+			tally[e.b] = (tally[e.b] or 0) + (e.winsB + e.draws * 0.5) / n
+			duels[e.a] = (duels[e.a] or 0) + 1
+			duels[e.b] = (duels[e.b] or 0) + 1
+		end
+	end
+	local scores = {}
+	for id, sum in pairs(tally) do
+		table.insert(scores, { id = id, name = UCConfig.get(id).name, score = math.floor(sum / duels[id] * 100) })
+	end
+	table.sort(scores, function(x, y) return x.score > y.score end)
+	return scores
+end
+
 -- ---------- history ----------
 
 function UCLab:saveExperiment(name, note, aggregated)

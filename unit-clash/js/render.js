@@ -95,7 +95,8 @@ export class Renderer {
         case 'buff': this.float('▲', ev.x, ev.y - 14, ev.color, 12); break;
         case 'bounce': this.burst(ev.x, ev.y, 6, ev.color, 120); break;
         case 'blink': this.ring(ev.x, ev.y, 26, ev.color); this.burst(ev.x, ev.y, 12, ev.color, 160); break;
-        case 'deviceDown': this.burst(ev.x, ev.y, 8, ev.color, 120); break;
+        case 'deviceHit': this.burst(ev.x, ev.y, 3, ev.color, 80); break;
+        case 'deviceDown': this.burst(ev.x, ev.y, 12, ev.color, 160); this.ring(ev.x, ev.y, 24, ev.color); break;
         case 'decoyPop': this.burst(ev.x, ev.y, 10, '#e57bd0', 130); break;
         case 'rebirth':
           this.ring(ev.x, ev.y, ev.r || 120, ev.color || '#ff9d5c');
