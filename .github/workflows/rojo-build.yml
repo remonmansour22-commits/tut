@@ -41,3 +41,17 @@ jobs:
         with:
           name: Roblox-builds
           path: build/*.rbxlx
+
+  sim-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Luau VM
+        run: |
+          curl -sL "https://github.com/luau-lang/luau/releases/latest/download/luau-ubuntu.zip" -o /tmp/luau.zip
+          unzip -o /tmp/luau.zip -d /tmp/luau-bin
+          sudo install /tmp/luau-bin/luau /usr/local/bin/luau
+
+      - name: Run headless simulation tests
+        run: tools/run_luau_sim_tests.sh
