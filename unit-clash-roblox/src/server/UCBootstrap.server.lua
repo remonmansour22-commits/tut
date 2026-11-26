@@ -9,7 +9,6 @@ local UCConfig = require(ReplicatedStorage:WaitForChild("UCShared"):WaitForChild
 local UCShareCodec = require(ReplicatedStorage:WaitForChild("UCShared"):WaitForChild("UCShareCodec"))
 local UCRng = require(script.Parent:WaitForChild("UCModules"):WaitForChild("UCRng"))
 local UCSimCore = require(script.Parent:WaitForChild("UCModules"):WaitForChild("UCSimCore"))
-local UCPresenter = require(script.Parent:WaitForChild("UCModules"):WaitForChild("UCPresenter"))
 local UCModes = require(script.Parent:WaitForChild("UCModules"):WaitForChild("UCModes"))
 local UCLab = require(script.Parent:WaitForChild("UCModules"):WaitForChild("UCLab"))
 local UCProgress = require(script.Parent:WaitForChild("UCModules"):WaitForChild("UCProgress"))
@@ -32,6 +31,7 @@ local evState = remote("UCState")
 local evResults = remote("UCResults")
 local evLab = remote("UCLab")
 local evToast = remote("UCToast")
+local evBattle = remote("UCBattle")
 
 -- ---------- session state ----------
 
@@ -139,8 +139,49 @@ local function toast(player, message)
 	evToast:FireClient(player, message)
 end
 
+local function momentumOf(core)
+	local mA, mB = 0, 0
+	for _, u in ipairs(core.units) do
+		if u.alive then
+			local value = u.def.cost * (u.hp / u.maxHp)
+			if u.team == "A" then
+				mA = mA + value
+			else
+				mB = mB + value
+			end
+		end
+	end
+	return { A = mA, B = mB }
+end
+
+-- Compact live snapshot for the 2D client renderer. The server keeps no visuals.
+local function snapshotFor(core)
+	local units, projs, devs, fx = {}, {}, {}, {}
+	for _, u in ipairs(core.units) do
+		if u.alive then
+			table.insert(units, { u.id, u.type, u.team, u.x, u.z, u.hp, u.maxHp, u.def.radius or 1 })
+		end
+	end
+	for _, p in ipairs(core.projectiles) do
+		table.insert(projs, { p.x, p.z, p.team })
+	end
+	for _, d in ipairs(core.devices) do
+		if d.alive ~= false and d.hp > 0 then
+			table.insert(devs, { d.kind, d.team, d.x, d.z, d.hp, d.maxHp, d.radius or (d.def and d.def.radius) or 3 })
+		end
+	end
+	local events = core:drainEvents()
+	for i, e in ipairs(events) do
+		if i > 24 then
+			break
+		end
+		table.insert(fx, { e.type, e.x or e.fx or 0, e.z or e.fz or 0, e.amount or e.r or 0, e.name or e.team or "" })
+	end
+	return { units = units, projs = projs, devs = devs, fx = fx, aliveA = core:aliveOf("A"), aliveB = core:aliveOf("B") }
+end
+
 local function broadcastState()
-	local momentum = session.battle and session.battle.presenter:momentum() or { A = 0, B = 0 }
+	local momentum = session.battle and momentumOf(session.battle.core) or { A = 0, B = 0 }
 	evState:FireAllClients({
 		phase = session.phase,
 		mode = session.mode,
@@ -197,10 +238,6 @@ end
 
 local function endBattle(result, core)
 	session.phase = "results"
-	local winnerName = result.winner == "draw" and "NOBODY" or UCConfig.TEAMS[result.winner].name
-	local bannerColor = result.winner == "draw" and Color3.fromRGB(160, 160, 160) or UCConfig.TEAMS[result.winner].color
-	UCVisualsVictory(result.winner == "draw" and "DRAW" or winnerName .. " WINS!", bannerColor)
-
 	local insights = lab:insights(result)
 	evResults:FireAllClients({ result = result, timeline = core.timeline, insights = insights })
 
@@ -254,7 +291,6 @@ local function stopBattle()
 		if session.battle.connection then
 			session.battle.connection:Disconnect()
 		end
-		session.battle.presenter:destroyAll()
 		session.battle = nil
 	end
 end
@@ -268,8 +304,7 @@ local function startBattle()
 	end
 	local config = buildConfigFromStaged()
 	local core = UCSimCore.new(config)
-	local presenter = UCPresenter.new(core, unitsFolder)
-	session.battle = { core = core, presenter = presenter, acc = 0, stateTimer = 0, cinematicDone = false }
+	session.battle = { core = core, acc = 0, stateTimer = 0, snapTimer = 0, cinematicDone = false }
 	session.phase = "battle"
 	session.speed = 1
 	session.paused = false
@@ -285,8 +320,11 @@ local function startBattle()
 			b.acc = b.acc - stepTime
 			b.core:step(stepTime)
 		end
-		presenter:handleEvents()
-		presenter:sync()
+		b.snapTimer = b.snapTimer + dt
+		if b.snapTimer >= 0.05 then
+			b.snapTimer = 0
+			evBattle:FireAllClients(snapshotFor(b.core))
+		end
 		b.stateTimer = b.stateTimer + dt
 		if b.stateTimer >= 1 then
 			b.stateTimer = 0
@@ -302,8 +340,7 @@ local function startBattle()
 			end)
 		end
 		if core.outcome then
-			presenter:handleEvents()
-			presenter:sync()
+			evBattle:FireAllClients(snapshotFor(core))
 			local connection = b.connection
 			session.battle = nil
 			if connection then
@@ -313,36 +350,6 @@ local function startBattle()
 		end
 	end)
 	return true, nil
-end
-
--- Battle Lab uses the same end screen banner.
-function UCVisualsVictory(text, color)
-	local part = Instance.new("Part")
-	part.Anchored = true
-	part.CanCollide = false
-	part.Size = Vector3.new(30, 6, 0.5)
-	part.Position = Vector3.new(0, 26, 0)
-	part.Color = color
-	part.Material = Enum.Material.Neon
-	part.Name = "UCVictoryBanner"
-	local gui = Instance.new("BillboardGui")
-	gui.Size = UDim2.new(1, 0, 1, 0)
-	gui.AlwaysOnTop = true
-	gui.Adornee = part
-	gui.Parent = part
-	local label = Instance.new("TextLabel")
-	label.Size = UDim2.new(1, 0, 1, 0)
-	label.BackgroundTransparency = 1
-	label.Text = text
-	label.TextScaled = true
-	label.Font = Enum.Font.GothamBlack
-	label.TextColor3 = Color3.fromRGB(255, 255, 255)
-	label.TextStrokeTransparency = 0.2
-	label.Parent = gui
-	part.Parent = arenaFolder
-	task.delay(6, function()
-		part:Destroy()
-	end)
 end
 
 function Players_GetFirst()
