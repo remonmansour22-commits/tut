@@ -56,9 +56,9 @@ UCConfig.UNITS = {
 		desc = "Slow armored wall of muscle.",
 	},
 	sparkcaster = {
-		name = "Spark Caster", category = "Ranged", cost = 110, hp = 75, speed = 13, radius = 1.1,
+		name = "Spark Caster", category = "Ranged", cost = 110, hp = 90, speed = 13, radius = 1.1,
 		range = 26, damage = 13, cooldown = 1.4, brain = "ranged", unlockLevel = 1,
-		projectile = { speed = 55, color = Color3.fromRGB(120, 200, 255) },
+		projectile = { speed = 80, color = Color3.fromRGB(120, 200, 255) },
 		ability = { name = "Chain Spark", cooldown = 5, kind = "bounce", jumps = 2, falloff = 0.6 },
 		color = Color3.fromRGB(120, 200, 255),
 		desc = "Bolts that chain to nearby enemies.",

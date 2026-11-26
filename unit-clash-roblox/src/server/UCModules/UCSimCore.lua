@@ -652,7 +652,23 @@ function UCSimCore:stepUnit(u, dt)
 			if target.isDevice then
 				self:damageDevice(u, target, dmg)
 			elseif u.def.ability and u.def.ability.kind == "bounce" then
-				self:castAbility(u, target)
+				self:fireProjectile(u, target, dmg)
+				local ab = u.def.ability
+				if u.abilityCd <= 0 then
+					u.abilityCd = ab.cooldown
+					self.stats.abilities[u.team] = self.stats.abilities[u.team] + 1
+					self:emit({ type = "ability", x = u.x, z = u.z, name = ab.name, team = u.team })
+					local jumped = 0
+					for _, e in ipairs(self.units) do
+						if jumped < ab.jumps and e.alive and e.team ~= u.team and e ~= target then
+							local d = (e.x - target.x) ^ 2 + (e.z - target.z) ^ 2
+							if d <= 14 * 14 then
+								self:fireProjectile(u, e, dmg * ab.falloff)
+								jumped = jumped + 1
+							end
+						end
+					end
+				end
 			else
 				self:fireProjectile(u, target, dmg)
 			end

@@ -143,6 +143,23 @@ for _, id in ipairs(UCConfig.ORDER) do
 	end
 end
 
+-- 4b. Regression: sparkcaster basic attacks must deal sustained damage, not
+-- only fire when its Chain Spark ability is off cooldown (was a real bug).
+local sparkDmg = 0
+for _, seed in ipairs({ 1, 2, 3 }) do
+	local c = UCSimCore.new({
+		seed = seed,
+		timeLimit = 45,
+		teams = {
+			A = { { type = "sparkcaster", x = -25, z = 0 } },
+			B = { { type = "sparkcaster", x = 25, z = 0 } },
+		},
+	})
+	local res = c:runToEnd()
+	sparkDmg = sparkDmg + res.A.damage + res.B.damage
+end
+check("sparkcaster sustained dps (bounce regression)", sparkDmg > 250, "total=" .. sparkDmg)
+
 -- 5. Survivors stay inside field bounds
 local half, depth = UCConfig.ARENA.HALF, UCConfig.ARENA.DEPTH
 local inBounds = true

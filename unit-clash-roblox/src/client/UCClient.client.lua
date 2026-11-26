@@ -25,6 +25,49 @@ local function act(cmd, args)
 	evAction:FireServer(cmd, args or {})
 end
 
+-- ---------- SFX: pooled built-in Roblox sounds, throttled ----------
+local SoundService = game:GetService("SoundService")
+local SFX_DEFS = {
+	hit = { id = "rbxasset://sounds/electronicpingshort.wav", vol = 0.22, pitch = { 0.9, 1.5 }, gap = 0.045 },
+	shoot = { id = "rbxasset://sounds/snap.mp3", vol = 0.12, pitch = { 1.1, 1.7 }, gap = 0.07 },
+	death = { id = "rbxasset://sounds/uuhhh.mp3", vol = 0.35, pitch = { 0.8, 1.15 }, gap = 0.09 },
+	ability = { id = "rbxasset://sounds/swoosh.wav", vol = 0.28, pitch = { 0.95, 1.2 }, gap = 0.08 },
+	impact = { id = "rbxasset://sounds/swordslash.wav", vol = 0.3, pitch = { 0.8, 1.1 }, gap = 0.1 },
+	victory = { id = "rbxasset://sounds/swordlunge.wav", vol = 0.5, pitch = { 0.55, 0.55 }, gap = 0.5 },
+	click = { id = "rbxasset://sounds/button.wav", vol = 0.35, pitch = { 0.95, 1.05 }, gap = 0.03 },
+	place = { id = "rbxasset://sounds/unsheath.wav", vol = 0.25, pitch = { 1.0, 1.25 }, gap = 0.05 },
+}
+local SFX_FOR_EVENT = {
+	hit = "hit", shoot = "shoot", death = "death", ability = "ability",
+	rebirth = "ability", deviceDown = "impact",
+}
+local sfxPool, sfxLast = {}, {}
+for i = 1, 12 do
+	local snd = Instance.new("Sound")
+	snd.Name = "UCSFX" .. i
+	snd.Volume = 0.3
+	snd.Parent = SoundService
+	sfxPool[i] = snd
+end
+local sfxNext = 0
+local function playSfx(kind)
+	local def = SFX_DEFS[kind]
+	if not def then
+		return
+	end
+	local now = os.clock()
+	if sfxLast[kind] and now - sfxLast[kind] < def.gap then
+		return
+	end
+	sfxLast[kind] = now
+	sfxNext = (sfxNext % #sfxPool) + 1
+	local snd = sfxPool[sfxNext]
+	snd.SoundId = def.id
+	snd.Volume = def.vol * (0.85 + math.random() * 0.3)
+	snd.PlaybackSpeed = def.pitch[1] + math.random() * (def.pitch[2] - def.pitch[1])
+	snd:Play()
+end
+
 local THEME = {
 	bg = Color3.fromRGB(11, 13, 24),
 	panel = Color3.fromRGB(17, 20, 33),
@@ -91,6 +134,9 @@ local function button(text, color, props, parent)
 	b.TextSize = 13
 	b.AutoButtonColor = true
 	corner(b, 6)
+	b.MouseButton1Click:Connect(function()
+		playSfx("click")
+	end)
 	return b
 end
 
@@ -204,10 +250,17 @@ local function unitSize(radius)
 	return math.clamp(radius * 0.05, 0.035, 0.085)
 end
 
+local CATEGORY_GLYPHS = {
+	Frontline = "\u{2B1F}", Heavy = "\u{2B22}", Agile = "\u{25B2}", Support = "\u{271A}",
+	Ranged = "\u{25C6}", Specialist = "\u{2726}", Commander = "\u{2605}",
+}
+local CATEGORY_WIDTH = { Heavy = 1.28, Agile = 0.82, Ranged = 0.95, Support = 0.9 }
+
 local function makeUnitVisual(id, def, team)
 	local sz = unitSize(def.radius or 1)
+	local szx = sz * (CATEGORY_WIDTH[def.category] or 1)
 	local root = mk("Frame", {
-		Size = UDim2.fromScale(sz, sz), AnchorPoint = Vector2.new(0.5, 0.5),
+		Size = UDim2.fromScale(szx, sz), AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = def.color or Color3.fromRGB(200, 200, 200), BorderSizePixel = 0, ZIndex = 5,
 	}, layerUnits)
 	corner(root, 999)
@@ -223,6 +276,12 @@ local function makeUnitVisual(id, def, team)
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255), BackgroundTransparency = 0.5, BorderSizePixel = 0, ZIndex = 6,
 	}, root)
 	corner(core, 999)
+	local glyph = mk("TextLabel", {
+		Size = UDim2.fromScale(0.72, 0.72), Position = UDim2.fromScale(0.5, 0.5), AnchorPoint = Vector2.new(0.5, 0.5),
+		BackgroundTransparency = 1, Text = CATEGORY_GLYPHS[def.category] or "",
+		TextColor3 = Color3.fromRGB(255, 255, 255), TextTransparency = 0.18,
+		Font = Enum.Font.GothamBold, TextScaled = true, ZIndex = 6,
+	}, root)
 	local barBg = mk("Frame", {
 		Size = UDim2.new(1.25, 0, 0.1, 0), Position = UDim2.fromScale(0.5, -0.1), AnchorPoint = Vector2.new(0.5, 1),
 		BackgroundColor3 = Color3.fromRGB(8, 9, 14), BorderSizePixel = 0, Visible = false, ZIndex = 7,
@@ -382,7 +441,9 @@ local FX_STYLES = {
 	end,
 	shoot = function(e) spawnRing(Color3.fromRGB(255, 255, 255), e[2], e[3], 1.2, 0.18) end,
 	despawn = function(e) spawnRing(Color3.fromRGB(120, 120, 130), e[2], e[3], 2, 0.3) end,
-	victory = function() end,
+	victory = function()
+		playSfx("victory")
+	end,
 	turret = function() end,
 	pad = function() end,
 }
@@ -395,6 +456,10 @@ local function handleFx(fxList)
 		local fn = FX_STYLES[e[1]]
 		if fn then
 			fn(e)
+		end
+		local sk = SFX_FOR_EVENT[e[1]]
+		if sk then
+			playSfx(sk)
 		end
 		if e[1] == "death" or e[1] == "deviceDown" then
 			shake = math.min(0.014, shake + 0.006)
@@ -1051,6 +1116,9 @@ UserInputService.InputBegan:Connect(function(input, processed)
 			return
 		end
 		local x, z = scaleToSim(fx, fy)
+		if state.selectedUnit then
+			playSfx("place")
+		end
 		act("place", { team = state.activeTeam, type = state.selectedUnit, upgrade = state.selectedUpgrade[state.selectedUnit], x = x, z = z })
 	elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
 		if state.phase ~= "setup" then
